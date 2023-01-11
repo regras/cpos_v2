@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "cpos"
+version = "0.1.0"
+description = "Python implementation of the CPoS protocol"
+authors = ["Vinicius Peixoto <nukelet@protonmail.com>"]
+license = "GPL-3.0"
+readme = "README.md"
+
+packages = [{include = "cpos"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+pyzmq = "^24.0.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
