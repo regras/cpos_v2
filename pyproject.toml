@@ -2,7 +2,7 @@
 name = "cpos"
 version = "0.1.0"
 description = "Python implementation of the CPoS protocol"
-authors = ["Vinicius Peixoto <nukelet@protonmail.com>", "Matheus Acaua Dias <matheusacauadias98@gmail.com>"]
+authors = ["Vinicius Peixoto <nukelet@protonmail.com>", "Matheus Acaua <matheusacauadias98@gmail.com>"]
 license = "GPL-3.0"
 readme = "README.md"
 
