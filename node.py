@@ -632,7 +632,7 @@ class Node(object):
                     sqldb.setArrivedBlock(new_block,1)
                     sqldb.setLogBlock(new_block, 1)
                     status = chaincontrol.addBlockLeaf(block=new_block)
-                    #print("status: ", status) 
+                    logging.info("status: "+str(status)) 
                     if(status):  
                         #self.insertNewBlock(message=[self.ipaddr, str(self.stake), new_block])                      
                         try:
@@ -667,8 +667,7 @@ class Node(object):
                 b = message[0]
                 prevHead = message[1]
                 lenght = self.leafchains.addBlockLeaf(-1,b,True,prevHead)
-                print("Lenght on commitBLock function")
-                print(lenght)
+                logging.info("Lenght on commitBLock function: " +str(lenght))
                 #self.semaphore.release()
                 return lenght
             else:
@@ -786,7 +785,7 @@ class Node(object):
         if(t == 16):
             blocks = message[0]
             stake = parameter.numStake
-            #print("logblock: ", logblock)
+            logging.debug("logblock: "+str(logblock))
             sumsuc = 0
             if(blocks):
                 for item in blocks:
@@ -844,8 +843,8 @@ class Node(object):
 
         message = [consensus.MSG_BLOCK,ip,str(user_stake),b,values,bloom_filter]
         message = pickle.dumps(message,2)
-        #print("####START SEND BLOCK####")
-        #print(b.hash)                        
+        logging.debug("####START SEND BLOCK####")
+        logging.debug("Block hash: "+str(b.hash))                        
         for k in setsend:
         #for k in self.peers:
             #start_new_thread(self.sendlateblock, (message,k))
@@ -1494,7 +1493,8 @@ class Node(object):
                                         self.semaphore.release()
                                     else:
                                         self.semaphore.release()
-                                        print("PEERS HAVE A WORST CHAIN...WE WILL NEED CONNECT WITH MORE PEERS AND TRY AGAIN")                
+                                        print("PEERS HAVE A WORST CHAIN...WE WILL NEED CONNECT WITH MORE PEERS AND TRY AGAIN")
+                                        logging.error("PEERS HAVE A WORST CHAIN...WE WILL NEED CONNECT WITH MORE PEERS AND TRY AGAIN")                
                                         #self.resync = self.resync + 1
                                 else:
                                     #self.semaphore.release()
