@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ppos_tb
 Probabilistic Proof-of-Stake consensus protocol testbed
 
@@ -91,3 +92,7 @@ stop node process
 - `-h` `--help`\
 help
 >>>>>>> 1ac629620fd2946b0d0cb79a0d0c65a2c2d6e0b3
+=======
+# cpos_v2
+A new and refactored version of CPoS.
+>>>>>>> ae73d7e81a7b347a88acfb5769b06535f8b432dd
