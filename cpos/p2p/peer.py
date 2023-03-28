@@ -1,7 +1,6 @@
-from cpos.protocol.messages import Message
-
 class PeerNetInfo:
     def __init__(self):
+        self.ip
         pass
 
 class Peer:
