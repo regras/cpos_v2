@@ -29,6 +29,7 @@ class Server:
         listener = self.listener
         while True:
             listener.listen()
+            # TODO: only accept connections from known (discovered peers)
             connection, addr = listener.accept()
             self.logger.debug(f"Received connection request from {addr}")
             connection_thread = threading.Thread(target=self.handle_connection,
@@ -41,12 +42,9 @@ class Server:
             while True:
                 # TODO: we definitely need a better way to do this
                 data = connection.recv(4096)
-                self.buffer.put(data)
-                if not data:
-                    self.logger.info(f"Received message from {addr}: {data}")
-                data = None
-                break
-
+                if data:
+                    self.buffer.put(data)
+                    self.logger.debug(f"Received message from {addr}: {data}")
 
 
 
