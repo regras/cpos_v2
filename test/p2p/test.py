@@ -8,7 +8,7 @@ def main():
     server = Server()
     for i in range(3):
         client = Client()
-        client.register("test_peer", "localhost", 8888)
+        client.register("test_peer", "192.168.0.1", 8888)
         client.connect("test_peer")
         msg = Hello("test_peer_1", 8888)
         client.send("test_peer", msg.serialize())
