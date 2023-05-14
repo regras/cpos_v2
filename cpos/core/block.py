@@ -3,38 +3,41 @@ from hashlib import sha256
 from cpos.core.transactions import TransactionList
 
 class Block:
-    def __init__(self, parent: Block, epoch_head: Block, transactions: TransactionList,
-                 owner_id: bytes, owner_pubkey: bytes,
-                 round: int, index: int, ticket_number: int):
+    # TODO: document the following changes:
+    # - Use regular SHA-256 hashes instead of Merkle tree roots for transactions
+    # - Use the node's pubkey as its ID
+    # - When calculating the node hash, use the hash of the previous block instead
+    #   of the epoch head
+    def __init__(self, parent: Block, transactions: TransactionList,
+                 owner_pubkey: bytes, round: int, index: int, ticket_number: int):
         self.parent_hash = parent.hash
-        self.epoch_head_hash = epoch_head.hash
-        self.owner_id = owner_id
         self.owner_pubkey = owner_pubkey
         self.round = round
         self.index = index
         self.transactions = transactions
         self.ticket_number = ticket_number
 
-        # TODO: calculate merkle root from raw transaction data (?)
-        self.merkle_root = b"\x00"
+        # TODO: TransactionList should implement a get_hash() function
+        self.transaction_hash = b"\x00"
 
-        self.node_hash = self.node_hash()
+        self.node_hash = self.calculate_node_hash()
         self.proof_hash = self.calculate_proof_hash()
         self.hash = self.calculate_hash()
 
     def calculate_node_hash(self):
         # TODO: document somewhere that we're representing the
         # round number and block index as little-endian uint32_t
-        return sha256(self.owner_id +
+        # TODO: document that we're using the owner_pubkey as the ID
+        return sha256(self.owner_pubkey +
                       self.round.to_bytes(4, "little", signed=False) +
-                      self.epoch_head_hash).digest()
+                      self.parent_hash).digest()
 
     def calculate_proof_hash(self):
         return sha256(self.node_hash +
                       self.ticket_number.to_bytes(4, "little", signed=False)).digest()
 
     def calculate_hash(self) -> bytes:
-        return sha256(self.proof_hash + self.parent_hash + self.merkle_root).digest()
+        return sha256(self.proof_hash + self.parent_hash + self.transaction_hash).digest()
 
 
 class GenesisBlock(Block):
@@ -50,12 +53,14 @@ class GenesisBlock(Block):
 
 if __name__ == "__main__":
     gen = GenesisBlock()
+    transactions = TransactionList()
     b = Block(parent = gen,
-              epoch_head = gen,
-              transactions = None,
-              owner_id = b"test",
+              transactions = transactions,
               owner_pubkey = b"testkey",
               round = 1,
-              index = 1)
-    hash = b.node_hash()
+              index = 1,
+              ticket_number = 1)
+    hash = b.node_hash
+    hash = 0
+    print(b.node_hash)
     print(hash)
