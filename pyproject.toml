@@ -11,6 +11,8 @@ packages = [{include = "cpos"}]
 [tool.poetry.dependencies]
 python = "^3.10"
 pyzmq = "^24.0.1"
+cryptography = "^40.0.2"
+jsonpickle = "^3.0.1"
 
 
 [tool.poetry.group.dev.dependencies]
