@@ -1,2 +1,5 @@
 class TransactionList:
-    pass
+    def __init__(self):
+        pass
+    def get_hash(self):
+        return b"\x00"
