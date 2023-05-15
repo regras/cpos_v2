@@ -50,33 +50,3 @@ def run_sortition(signed_node_hash: bytes, stake: int,
 
     # print(f"result: {i}")
     return i
-
-def main():
-    gen = GenesisBlock()
-    transactions = TransactionList()
-    b = Block(parent = gen,
-              transactions = transactions,
-              owner_pubkey = b"testkey",
-              round = 1,
-              index = 1,
-              ticket_number = 1)
-
-    total_tickets = 0
-    desired_tickets = 2
-    node_count = 10000
-    stake = 3
-    p = desired_tickets / (node_count * stake)
-    for i in range(node_count):
-        priv = Ed25519PrivateKey.generate()
-        signed_node_hash = priv.sign(b.node_hash)
-        # TODO: understand why the last byte of the signature is small
-        # print(signed_node_hash.hex())
-        # print(f"length: {len(signed_node_hash)}")
-        successes = run_sortition(signed_node_hash, stake, p)
-        if successes > 0:
-            print(f"node no. {i} ({priv.public_key().public_bytes_raw().hex()})")
-        total_tickets += successes
-    print(f"total tickets: {total_tickets}")
-
-if __name__ == "__main__":
-    main()
