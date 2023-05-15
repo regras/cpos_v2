@@ -1,9 +1,13 @@
 from __future__ import annotations
 import json
+import base64
+
+from cpos.core.block import Block
 
 class MessageCode:
     UNDEFINED = 0x0
     HELLO = 0x1
+    BLOCK_BROADCAST = 0x2
 
 class MessageParseError(Exception):
     pass
@@ -30,3 +34,20 @@ class Hello(Message):
         self.msg_code = MessageCode.HELLO
         self.peer_id = peer_id
         self.peer_port = peer_port
+
+class BlockBroadcast(Message):
+    def __init__(self, block: Block):
+        self.code = MessageCode.BLOCK_BROADCAST
+        self.block = block
+
+    def serialize(self):
+        # TODO: this is horribly ugly, need to find a decent serializatino strategy
+        fields = ["parent_hash", "transaction_hash", "owner_pubkey", "index", "round", "ticket_number"]
+        b = self.block
+        data = {}
+        for field in fields:
+            entry = b.__dict__[field]
+            if isinstance(entry, bytes):
+                data[field] = base64.encode(entry)
+
+        return data
