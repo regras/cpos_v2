@@ -8,9 +8,9 @@ class Block:
     # - Use the node's pubkey as its ID
     # - When calculating the node hash, use the hash of the previous block instead
     #   of the epoch head
-    def __init__(self, parent: Block, transactions: TransactionList,
+    def __init__(self, parent_hash: bytes, transactions: TransactionList,
                  owner_pubkey: bytes, round: int, index: int, ticket_number: int):
-        self.parent_hash = parent.hash
+        self.parent_hash = parent_hash
         self.owner_pubkey = owner_pubkey
         self.round = round
         self.index = index
@@ -18,7 +18,7 @@ class Block:
         self.ticket_number = ticket_number
 
         # TODO: TransactionList should implement a get_hash() function
-        self.transaction_hash = b"\x00"
+        self.transaction_hash = transactions.get_hash()
 
         self.node_hash = self.calculate_node_hash()
         self.proof_hash = self.calculate_proof_hash()
@@ -39,6 +39,9 @@ class Block:
     def calculate_hash(self) -> bytes:
         return sha256(self.proof_hash + self.parent_hash + self.transaction_hash).digest()
 
+    def __str__(self):
+        return f"Block(hash={self.hash.hex()}, parent={self.parent_hash.hex()}, owner={self.owner_pubkey.hex()}, round={self.round}, index={self.index})"
+
 
 class GenesisBlock(Block):
     def __init__(self):
@@ -54,13 +57,10 @@ class GenesisBlock(Block):
 if __name__ == "__main__":
     gen = GenesisBlock()
     transactions = TransactionList()
-    b = Block(parent = gen,
+    b = Block(parent_hash = gen.hash,
               transactions = transactions,
               owner_pubkey = b"testkey",
               round = 1,
               index = 1,
               ticket_number = 1)
-    hash = b.node_hash
-    hash = 0
-    print(b.node_hash)
-    print(hash)
+    print(b)
