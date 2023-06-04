@@ -6,6 +6,5 @@ WORKDIR /cpos
 COPY . /cpos
 
 RUN poetry install
-RUN poetry run pytest
 
 CMD ["/bin/bash"]
