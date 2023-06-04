@@ -1,6 +1,14 @@
 # cpos_v2
 A new and refactored version of CPoS.
 
+## Run with Docker
+
+Run the following to build+run the Docker image, as well as attach to a shell within the container:
+
+```
+$ sudo docker-compose run cpos bash
+```
+
 ## Requirements
 We use [Poetry](https://python-poetry.org/docs/) to build the project, manage dependencies and run unit tests. To install it on Linux/WSL, run
 
