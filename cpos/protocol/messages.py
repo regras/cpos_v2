@@ -1,8 +1,9 @@
 from __future__ import annotations
 import json
-import base64
+from base64 import b64encode, b64decode
 
 from cpos.core.block import Block
+from cpos.core.transactions import TransactionList
 
 class MessageCode:
     UNDEFINED = 0x0
@@ -48,8 +49,27 @@ class BlockBroadcast(Message):
         for field in fields:
             entry = b.__dict__[field]
             if isinstance(entry, bytes):
-                data[field] = base64.b64encode(entry)
+                data[field] = b64encode(entry).decode("ascii")
             else:
                 data[field] = entry
-
-        return data
+        return bytes(json.dumps(data), 'ascii')
+    
+    @classmethod
+    def deserialize(cls, raw: bytes) -> BlockBroadcast:
+        fields = ["hash", "parent_hash", "transaction_hash", "owner_pubkey", "index", "round", "ticket_number"]
+        raw_dict = json.loads(raw.decode("ascii"))
+        print(f"deserialized: {raw_dict}")
+        # TODO: this transaction stub needs to be implemented eventually
+        stub = TransactionList()
+        parent_hash = b64decode(raw_dict["parent_hash"])
+        owner_pubkey = b64decode(raw_dict["owner_pubkey"])
+        block = Block(parent_hash = parent_hash,
+                      transactions = stub,
+                      owner_pubkey = owner_pubkey,
+                      round = raw_dict["round"],
+                      index = raw_dict["index"],
+                      ticket_number = raw_dict["ticket_number"])
+        return BlockBroadcast(block)
+        # except Exception as e:
+        #     print(e)
+        #     raise ValueError("invalid block serialization")
