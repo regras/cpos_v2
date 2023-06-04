@@ -41,13 +41,15 @@ class BlockBroadcast(Message):
         self.block = block
 
     def serialize(self):
-        # TODO: this is horribly ugly, need to find a decent serializatino strategy
-        fields = ["parent_hash", "transaction_hash", "owner_pubkey", "index", "round", "ticket_number"]
+        # TODO: this is horribly ugly, we need to find a decent serialization strategy
+        fields = ["hash", "parent_hash", "transaction_hash", "owner_pubkey", "index", "round", "ticket_number"]
         b = self.block
         data = {}
         for field in fields:
             entry = b.__dict__[field]
             if isinstance(entry, bytes):
-                data[field] = base64.encode(entry)
+                data[field] = base64.b64encode(entry)
+            else:
+                data[field] = entry
 
         return data
