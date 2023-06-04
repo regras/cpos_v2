@@ -10,7 +10,7 @@ class TransactionList:
     def deserialize(cls, raw: bytes) -> TransactionList:
         pass
     def get_hash(self) -> bytes:
-        pass
+        return b"\x00"
 
 # generating random bytes: https://bobbyhadz.com/blog/python-generate-random-bytes
 # encoding binary data with base64: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
