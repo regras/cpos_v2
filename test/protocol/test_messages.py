@@ -12,15 +12,17 @@ def test_block_broadcast_serialization():
     b = Block(parent_hash = gen.hash,
               transactions = transactions,
               owner_pubkey = b"testkey",
+              signed_node_hash = b"1234",
               round = 1,
               index = 1,
               ticket_number = 1)
     original = Block(parent_hash = b.hash,
-                  transactions = transactions,
-                  owner_pubkey = b"testkey2",
-                  round = 2,
-                  index = 2,
-                  ticket_number = 1)
+                     transactions = transactions,
+                     owner_pubkey = b"testkey2",
+                     signed_node_hash = b"12345",
+                     round = 2,
+                     index = 2,
+                     ticket_number = 1)
     msg = BlockBroadcast(original)
     deserialized = BlockBroadcast.deserialize(msg.serialize()).block
     assert original.hash == deserialized.hash
