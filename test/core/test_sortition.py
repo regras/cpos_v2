@@ -25,6 +25,7 @@ def test_total_ticket_distribution():
     b = Block(parent_hash = gen.hash,
               transactions = transactions,
               owner_pubkey = b"testkey",
+              signed_node_hash = b"",
               round = 1,
               index = 1,
               ticket_number = 1)
@@ -59,11 +60,12 @@ def test_ticket_distribution():
     transactions = TransactionList()
     priv = Ed25519PrivateKey.generate()
     block = Block(parent_hash = gen.hash,
-              transactions = transactions,
-              owner_pubkey = b"testkey",
-              round = 1,
-              index = 1,
-              ticket_number = 1)
+                  transactions = transactions,
+                  owner_pubkey = b"testkey",
+                  signed_node_hash = b"",
+                  round = 1,
+                  index = 1,
+                  ticket_number = 1)
 
     results = []
     total_tickets = 0
@@ -81,11 +83,12 @@ def test_ticket_distribution():
         results.append(q)
         print(block)
         block = Block(parent_hash = block.hash,
-                  transactions = transactions,
-                  owner_pubkey = b"testkey",
-                  round = block.round + 1,
-                  index = block.index + 1,
-                  ticket_number = 1)
+                      transactions = transactions,
+                      owner_pubkey = b"testkey",
+                      signed_node_hash = b"",
+                      round = block.round + 1,
+                      index = block.index + 1,
+                      ticket_number = 1)
     plt.hist(results)
     plt.show()
 
