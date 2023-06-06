@@ -1,6 +1,7 @@
 from __future__ import annotations
 from hashlib import sha256
 from cpos.core.transactions import TransactionList
+from time import time
 
 class Block:
     # TODO: document the following changes:
@@ -9,9 +10,11 @@ class Block:
     # - When calculating the node hash, use the hash of the previous block instead
     #   of the epoch head
     def __init__(self, parent_hash: bytes, transactions: TransactionList,
-                 owner_pubkey: bytes, round: int, index: int, ticket_number: int):
+                 owner_pubkey: bytes, signed_node_hash: bytes,
+                 round: int, index: int, ticket_number: int):
         self.parent_hash = parent_hash
         self.owner_pubkey = owner_pubkey
+        self.signed_node_hash = signed_node_hash
         self.round = round
         self.index = index
         self.transactions = transactions
@@ -44,7 +47,7 @@ class Block:
 
 
 class GenesisBlock(Block):
-    def __init__(self):
+    def __init__(self, timestamp=None):
         self.hash = b"\x00"
         self.parent_hash = b"\x00"
         self.owner_id = b"\x00"
@@ -52,15 +55,11 @@ class GenesisBlock(Block):
         self.round = 0
         self.index = 0
         self.epoch_head_hash = b"\x00"
+        self.timestamp = timestamp if timestamp is not None else time()
 
-
-if __name__ == "__main__":
-    gen = GenesisBlock()
-    transactions = TransactionList()
-    b = Block(parent_hash = gen.hash,
-              transactions = transactions,
-              owner_pubkey = b"testkey",
-              round = 1,
-              index = 1,
-              ticket_number = 1)
-    print(b)
+    def __str__(self):
+        return (
+            f"GenesisBlock(hash={self.hash.hex()}, parent={self.parent_hash.hex()}, "
+                         f"owner={self.owner_pubkey.hex()}, round={self.round}, "
+                         f"index={self.index}, timestamp={self.timestamp})"
+        )
