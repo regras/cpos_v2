@@ -5,7 +5,6 @@ from typing import Optional
 import logging
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.exceptions import InvalidSignature
-from hashlib import sha256
 
 class BlockChainParameters:
     def __init__(self, round_time: float, tolerance: int, tau: int, total_stake=10):
