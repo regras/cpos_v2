@@ -49,7 +49,7 @@ from cpos.p2p.network import Network
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", help="which port to bind the CPoS beacon to")
-    parser.add_argument("--id", help="beacon ID", type=str)
+    parser.add_argument("--id", help="beacon ID", type=str, required=True)
     args = parser.parse_args()
 
     if args.id:
