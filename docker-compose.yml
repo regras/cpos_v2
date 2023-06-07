@@ -2,3 +2,15 @@ services:
   cpos:
     build: .
     container_name: cpos
+    volumes:
+      - ./:/cpos
+  beacon:
+    build: .
+    container_name: cpos_beacon
+    hostname: cpos_beacon
+    volumes:
+      - ./:/cpos
+    ports:
+      - "9000:9000"
+    expose:
+      - "9000"
