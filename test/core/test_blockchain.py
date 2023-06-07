@@ -56,3 +56,28 @@ def test_basic_insertion():
 
     # trying to insert again should fail
     assert bc.insert(block) == False
+
+def test_failed_insertion():
+    params = BlockChainParameters(round_time = 15.0,
+                                  tolerance = 2,
+                                  tau = 2,
+                                  total_stake = 10)
+    bc = BlockChain(params)
+
+    # this key will fail the sortition
+    key = bytes.fromhex("e41d3e2c7962025f5fa475ec31f3ff6ee5e0a347efffc8e097d854987127b9a3")
+    privkey = Ed25519PrivateKey.from_private_bytes(key)
+    print(privkey.private_bytes_raw().hex())
+    pubkey = privkey.public_key()
+    tx = TransactionList()
+    block = Block(parent_hash=bc.genesis.hash,
+                  transactions=tx,
+                  owner_pubkey=pubkey.public_bytes_raw(),
+                  signed_node_hash=b"",
+                  round=0,
+                  index=1,
+                  ticket_number=1)
+    block.signed_node_hash = privkey.sign(block.node_hash)
+
+    assert bc.insert(block) == False 
+
