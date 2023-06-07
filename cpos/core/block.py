@@ -20,9 +20,11 @@ class Block:
         self.transactions = transactions
         self.ticket_number = ticket_number
 
-        # TODO: TransactionList should implement a get_hash() function
-        self.transaction_hash = transactions.get_hash()
+        self.update()
 
+    def update(self):
+        # TODO: TransactionList should implement a get_hash() function
+        self.transaction_hash = self.transactions.get_hash()
         self.node_hash = self.calculate_node_hash()
         self.proof_hash = self.calculate_proof_hash()
         self.hash = self.calculate_hash()
