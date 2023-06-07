@@ -8,7 +8,7 @@ class Network:
 
         logger = logging.getLogger(__name__ + id.hex())
         handler = logging.StreamHandler()
-        formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [0x{self.id.hex()}] %(message)s")
+        formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [0x{self.id.hex()[0:8]}] %(message)s")
         logger.setLevel(logging.DEBUG)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
@@ -38,7 +38,7 @@ class Network:
 
     def read(self) -> bytes:
         peer_id, _, msg = self.socket.recv_multipart()
-        self.logger.debug(f"received message from peer {peer_id}: {msg}")
+        self.logger.debug(f"received message from peer {peer_id.hex()[0:8]}: {msg}")
         if peer_id not in self.known_peers:
             self.known_peers.append(peer_id)
         return msg
