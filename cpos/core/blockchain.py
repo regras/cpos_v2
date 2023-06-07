@@ -71,7 +71,8 @@ class BlockChain:
         total_stake = self.lookup_total_stake()
         success_probability = self.parameters.tau / total_stake
         winning_tickets = run_sortition(block.signed_node_hash, stake, success_probability)
-        if winning_tickets < block.ticket_number:
+        self.logger.debug(f"ran sortition for block {block.hash.hex()[0:7]} (p = {success_probability}); result = {winning_tickets}")
+        if winning_tickets == 0 or winning_tickets < block.ticket_number:
             self._log_failed_verification(block, "sortition failed")
             return False
         
