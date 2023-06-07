@@ -45,7 +45,7 @@ class Block:
         return sha256(self.proof_hash + self.parent_hash + self.transaction_hash).digest()
 
     def __str__(self):
-        return f"Block(hash={self.hash.hex()}, parent={self.parent_hash.hex()}, owner={self.owner_pubkey.hex()}, round={self.round}, index={self.index})"
+        return f"Block(hash={self.hash.hex()[0:8]}, parent={self.parent_hash.hex()[0:8]}, owner={self.owner_pubkey.hex()[0:8]}, round={self.round}, index={self.index})"
 
 
 class GenesisBlock(Block):
