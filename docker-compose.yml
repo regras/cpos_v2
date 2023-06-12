@@ -1,16 +1,27 @@
 services:
-  cpos:
+  node:
     build: .
-    container_name: cpos
+    # container_name: cpos_node
+    deploy:
+      replicas: 10
     volumes:
-      - ./:/cpos
+      - ./demo:/cpos/demo
+    ports:
+      - "8888"
+    environment:
+      - BEACON_IP=cpos_beacon
+      - BEACON_PORT=9000
+      - PORT=8888
+      - GENESIS_TIMESTAMP=1686584178
+    command: /bin/bash demo/run_node.sh
   beacon:
     build: .
     container_name: cpos_beacon
     hostname: cpos_beacon
     volumes:
-      - ./:/cpos
+      - ./demo:/cpos/demo
     ports:
       - "9000:9000"
-    expose:
-      - "9000"
+    environment:
+      - PORT=9000
+    command: /bin/bash demo/run_beacon.sh
