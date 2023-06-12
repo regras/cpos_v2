@@ -46,6 +46,12 @@ class BlockBroadcast(Message):
         self.code = MessageCode.BLOCK_BROADCAST
         self.block = block
 
+    def __str__(self):
+        return self.block.__str__()
+    
+    def __repr__(self):
+        return self.__str__()
+
 class PeerListRequest(Message):
     def __init__(self, node_id: bytes):
         self.code = MessageCode.PEER_LIST_REQUEST

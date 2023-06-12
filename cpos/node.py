@@ -1,22 +1,27 @@
 from time import time
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
-from cpos.core.block import Block
-from cpos.core.blockchain import BlockChain, BlockChainParameters
-from cpos.core.transactions import TransactionList
-from cpos.p2p.network import Network
 from typing import Optional
 import logging
 
+from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from cpos.core.block import Block, GenesisBlock
+from cpos.core.blockchain import BlockChain, BlockChainParameters
+from cpos.core.transactions import TransactionList
+from cpos.p2p.network import Network
+
 from cpos.protocol.messages import BlockBroadcast, Hello, Message
+
+from cpos.p2p.discovery.client import Client as DiscoveryClient
+from cpos.p2p.peer import Peer
 
 class NodeConfig:
     def __init__(self, **kwargs):
-        self.port: str = kwargs.get("port", "8888")
+        self.port: int = kwargs.get("port", 8888)
         self.privkey: Optional[bytes] = kwargs.get("privkey", None)
         self.id: Optional[bytes] = kwargs.get("id", None)
-        self.peerlist: Optional[list[tuple[str, str, bytes]]] = kwargs.get("peerlist", None)   
+        self.peerlist: Optional[list[Peer]] = kwargs.get("peerlist", None)
         self.beacon_ip: Optional[str] = kwargs.get("beacon_ip", None)
-        self.beacon_port: Optional[str | int] = kwargs.get("beacon_port", None)
+        self.beacon_port: Optional[int] = kwargs.get("beacon_port", None)
+        self.genesis_timestamp: Optional[int] = kwargs.get("genesis_timestamp", None)
 
     def __str__(self):
         return str(self.__dict__)
@@ -36,9 +41,9 @@ class Node:
 
         self.pubkey = self.privkey.public_key()
         if self.config.id is not None:
-            self.id = self.config.id
+            self.id: bytes = self.config.id
         else:
-            self.id = self.pubkey.public_bytes_raw()
+            self.id: bytes = self.pubkey.public_bytes_raw()
 
         logger = logging.getLogger(__name__ + self.id.hex())
         handler = logging.StreamHandler()
@@ -48,17 +53,50 @@ class Node:
         logger.addHandler(handler)
         self.logger = logger
 
-        self.network = Network(self.id, self.config.port)
+        self._contact_beacon()
 
-        if self.config.peerlist is not None:
-            for (peer_ip, peer_port, peer_id) in self.config.peerlist:
-                self.network.connect(peer_ip, peer_port, peer_id)
+        self._init_network()
+
+        # this is an improvised hack for demo purposes, here we should
+        # resync with other nodes in the network and only generate a
+        # genesis block if there are no other peers
+        genesis = None
+        if self.config.genesis_timestamp is not None:
+            genesis = GenesisBlock(timestamp=self.config.genesis_timestamp)
+            self.logger.info(f"generating genesis block: {genesis}")
 
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
         # - request a copy of the blockchain (implement sync)
-        params = BlockChainParameters(round_time=1, tolerance=2, tau=1, total_stake=20)
-        self.bc = BlockChain(params)
+        params = BlockChainParameters(round_time=1, tolerance=2, tau=1, total_stake=10)
+        self.bc = BlockChain(params, genesis=genesis)
+        
+
+    # TODO: this should probably be moved into the cpos.p2p.network
+    def _contact_beacon(self):
+        beacon_ip = self.config.beacon_ip
+        beacon_port = self.config.beacon_port
+        port = self.config.port
+        id = self.id
+
+        if beacon_ip is None or beacon_port is None:
+            self.logger.error(f"missing beacon network info!")
+            return
+        
+        client = DiscoveryClient(beacon_ip, beacon_port, port, id)
+        peerlist = client.get_peerlist()
+        if peerlist is not None:
+            self.config.peerlist = peerlist
+
+
+    def _init_network(self):
+        self.network = Network(self.id, self.config.port)
+
+        if self.config.peerlist is not None:
+            for peer in self.config.peerlist:
+                if peer.id == self.id:
+                    continue
+                self.network.connect(peer.ip, peer.port, peer.id)
 
     def send_message(self, dest_peer_id: bytes, msg: Message):
         self.logger.debug(f"sending {msg} to peer {dest_peer_id.hex()[0:8]}")
@@ -114,12 +152,14 @@ class Node:
             self.logger.info(f"successfully generated a block: {candidate}")
         return candidate
 
+    def handle_new_block(self, block: Block):
+        self.logger.info(f"trying to insert {block}")
+        self.bc.insert(block)
 
     def loop(self):
         round = self.bc.genesis.timestamp
         while True:
             self.bc.update_round()
-
             # on round change:
             if round != self.bc.current_round:
                 round = self.bc.current_round
@@ -128,7 +168,17 @@ class Node:
                     self.bc.insert(new_block)
                     self.broadcast_message(BlockBroadcast(new_block))
 
+            raw = self.network.read()
+            if raw is None:
+                continue
+            msg = Message.deserialize(raw)
+            self.logger.debug(f"new message: {msg}")
+
+            if isinstance(msg, BlockBroadcast):
+                self.handle_new_block(msg.block)    
+
     def start(self):
+        self.logger.debug(f"peerlist: {self.network.known_peers}")
         self.greet_peers()
         self.loop()
 
