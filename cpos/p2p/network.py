@@ -9,8 +9,8 @@ class Network:
 
         logger = logging.getLogger(__name__ + id.hex())
         handler = logging.StreamHandler()
-        formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [0x{self.id.hex()[0:8]}] %(message)s")
-        logger.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [{self.id.hex()[0:8]}] %(message)s")
+        logger.setLevel(logging.INFO)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         self.logger = logger
