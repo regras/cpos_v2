@@ -19,13 +19,13 @@ class BlockChain:
         logger = logging.getLogger(__name__)
         handler = logging.StreamHandler()
         formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: %(message)s")
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         self.logger = logger
         
-        self.blocks = []
-        self.parameters = parameters
+        self.blocks: list[Block] = []
+        self.parameters: BlockChainParameters = parameters
 
         if genesis is not None:
             self.genesis = genesis
@@ -79,7 +79,15 @@ class BlockChain:
         return True
 
     def _log_failed_insertion(self, block: Block, reason: str):
-        self.logger.debug(f"discarding block {block.hash.hex()} ({reason})")
+        self.logger.info(f"discarding block {block.hash.hex()} ({reason})")
+
+    def set_genesis_block(self, genesis: GenesisBlock) -> bool:
+        if len(self.blocks) != 0:
+            self.logger.error(f"refusing to insert new genesis block")
+            return False
+
+        self.blocks.append(genesis)
+        return True
 
     def insert(self, block: Block) -> bool:
         if block.index == 0:
@@ -105,9 +113,9 @@ class BlockChain:
             return False
 
         if len(self.blocks) > block.index:
-            self.logger.debug(f"removing old block range ({block.index}, {len(self.blocks) - 1})")
+            self.logger.info(f"removing old block range ({block.index}, {len(self.blocks) - 1})")
             self.blocks[block.index : ] = []
-        self.logger.debug(f"inserting {block}") 
+        self.logger.info(f"inserting {block}") 
         self.blocks.append(block)
 
         return True
