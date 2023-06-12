@@ -1,4 +1,8 @@
-## Implementing the node state machine
-- Implement a timer that updates the current blockchain round
-- React to block broadcast messages by trying to insert them
-- Every round: if successful sortition, broadcast block
+- Fix the node tests
+- Refactor the logging subsystem
+    - Lots of repeated code (for basically every class that uses logging)
+    - Unable to log to a file
+- Implement resync between nodes
+- Maybe implement some sort of heartbeat between the beacon and the nodes
+    - Or drop peers from the local node peerlist after too many "host unreachable" errors
+- Use list[Peer] in cpos.p2p.network? Or at least find a way to pretty-print the peer IDs
