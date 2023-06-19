@@ -19,7 +19,7 @@ def plot_bc(bc: BlockChain, filename: str):
     dot = graphviz.Graph(filename)
     dot.format = "png"
     for block in bc.blocks:
-        dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> </TABLE>>")
+        dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> <TR> <TD> owner: [{block.owner_pubkey.hex()[0:8]}] </TD> </TR> </TABLE>>")
 
     for i in range(0, len(bc.blocks) - 1):
         dot.edge(f"{i}", f"{i+1}")
