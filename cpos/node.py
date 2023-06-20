@@ -69,8 +69,9 @@ class Node:
         # - request the blockchain parameters from other nodes
         # - request a copy of the blockchain (implement sync)
         params = BlockChainParameters(round_time=1, tolerance=2, tau=1, total_stake=10)
-        self.bc = BlockChain(params, genesis=genesis)
+        self.bc: BlockChain = BlockChain(params, genesis=genesis)
         
+        self.should_halt: bool = False
 
     # TODO: this should probably be moved into the cpos.p2p.network
     def _contact_beacon(self):
@@ -159,6 +160,10 @@ class Node:
     def loop(self):
         round = self.bc.genesis.timestamp
         while True:
+            if self.should_halt:
+                self.logger.error("halted")
+                break
+
             self.bc.update_round()
             # on round change:
             if round != self.bc.current_round:
@@ -178,9 +183,14 @@ class Node:
                 self.handle_new_block(msg.block)    
 
     def start(self):
+        self.should_halt = False
         self.logger.debug(f"peerlist: {self.network.known_peers}")
         self.greet_peers()
         self.loop()
+
+    def halt(self):
+        self.logger.error(f"trying to halt...")
+        self.should_halt = True
 
     def __str__(self):
         return f"Node(id={self.id.hex()[0:8]})"
