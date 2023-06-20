@@ -173,7 +173,8 @@ class Node:
                     self.bc.insert(new_block)
                     self.broadcast_message(BlockBroadcast(new_block))
 
-            raw = self.network.read()
+            # the 200ms timeout prevents us from busy-waiting
+            raw = self.network.read(timeout=200)
             if raw is None:
                 continue
             msg = Message.deserialize(raw)
