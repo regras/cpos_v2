@@ -3,10 +3,12 @@ A new and refactored version of CPoS.
 
 ## Run with Docker
 
-Run the following to build+run the Docker image, as well as attach to a shell within the container:
+### Running a beacon
+
+Run the following to build+run the Docker image, as well as spawn a beacon instance:
 
 ```
-$ sudo docker-compose run cpos bash
+$ sudo docker compose run beacon
 ```
 
 Now, inside the container, run the following to configure the environment:
