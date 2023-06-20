@@ -11,12 +11,6 @@ Run the following to build+run the Docker image, as well as spawn a beacon insta
 $ sudo docker compose run beacon
 ```
 
-Now, inside the container, run the following to configure the environment:
-
-```
-# poetry shell
-```
-
 ## Requirements
 We use [Poetry](https://python-poetry.org/docs/) to build the project, manage dependencies and run unit tests. To install it on Linux/WSL, run
 
