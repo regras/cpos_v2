@@ -5,10 +5,10 @@ A new and refactored version of CPoS.
 
 ### Running a beacon
 
-Run the following to build+run the Docker image, as well as spawn a beacon instance:
+Run the following to build+run the Docker image, as well as spawn a beacon instance (you might need admin privileges, i.e. `sudo`):
 
 ```
-$ sudo docker compose run beacon
+$ docker-compose run beacon
 ```
 
 ## Requirements
