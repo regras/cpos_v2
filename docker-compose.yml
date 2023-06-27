@@ -17,11 +17,9 @@ services:
   beacon:
     build: .
     container_name: cpos_beacon
-    hostname: cpos_beacon
+    network_mode: "host"
     volumes:
       - ./demo:/cpos/demo
-    ports:
-      - "9000:9000"
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
