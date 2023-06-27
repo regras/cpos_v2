@@ -9,7 +9,7 @@ services:
     ports:
       - "8888"
     environment:
-      - BEACON_IP=cpos_beacon
+      - BEACON_IP=join.dca.fee.unicamp.br
       - BEACON_PORT=9000
       - PORT=8888
       - GENESIS_TIMESTAMP=1686584178
