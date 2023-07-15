@@ -47,6 +47,9 @@ class Block:
     def __str__(self):
         return f"Block(hash={self.hash.hex()[0:8]}, parent={self.parent_hash.hex()[0:8]}, owner={self.owner_pubkey.hex()[0:8]}, round={self.round}, index={self.index})"
 
+    def __repr__(self):
+        return self.__str__()
+
 
 class GenesisBlock(Block):
     def __init__(self, timestamp=None):
@@ -65,3 +68,6 @@ class GenesisBlock(Block):
                          f"owner={self.owner_pubkey.hex()}, round={self.round}, "
                          f"index={self.index}, timestamp={self.timestamp})"
         )
+
+    def __repr__(self):
+        return self.__str__()
