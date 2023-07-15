@@ -120,6 +120,29 @@ class BlockChain:
 
         return True
 
+    # TODO: ideally i think it would be nice to deal with this
+    # more elegantly using iterators and slices
+    def merge(self, foreign_blocks: list[Block]) -> bool:
+        idx = None
+        first_foreign_block = foreign_blocks[0]
+        for i, block in enumerate(self.blocks):
+            if block.hash == first_foreign_block.parent_hash:
+                idx = i
+                break
+
+        if idx is None:
+            self.logger.error(f"foreign subchain has no common ancestor with local chain")
+            return False
+
+
+        original_local_subchain = self.blocks[idx + 1 : ]
+        
+
+        self.logger.debug(f"found common ancestor: {self.blocks}")
+
+        return True
+
+
     def _dump_state(self):
         for block in self.blocks:
             print(block)
