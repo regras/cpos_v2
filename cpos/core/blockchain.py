@@ -96,9 +96,6 @@ class BlockChain:
         if block.index > len(self.blocks):
             self._log_failed_insertion(block, "gap in local chain")
             return False
-        if block.round < self.current_round or block.round > self.current_round + self.parameters.tolerance:
-            self._log_failed_insertion(block, "outside of tolerance range")
-            return False
         
         if not self.validate_block(block):
             self._log_failed_insertion(block, "validation failed")
@@ -123,6 +120,7 @@ class BlockChain:
     # TODO: ideally i think it would be nice to deal with this
     # more elegantly using iterators and slices
     def merge(self, foreign_blocks: list[Block]) -> bool:
+        self.logger.info(f"starting merge process with fork: {foreign_blocks}")
         idx = None
         first_foreign_block = foreign_blocks[0]
         for i, block in enumerate(self.blocks):
@@ -135,10 +133,21 @@ class BlockChain:
             return False
 
 
+        self.logger.info(f"found common ancestor: {self.blocks[idx]}")
+        # temporarily remove local fork from the chain
         original_local_subchain = self.blocks[idx + 1 : ]
-        
+        self.blocks[idx + 1 : ] = []
 
-        self.logger.debug(f"found common ancestor: {self.blocks}")
+        # try inserting the head of the fork
+        if not self.insert(foreign_blocks.pop(0)):
+            self.logger.info(f"merge failed: foreign chain is worse than local chain")
+            self.blocks += original_local_subchain
+            return False
+        # if successful, try inserting all following blocks
+        else:
+            for block in foreign_blocks:
+                if not self.insert(block):
+                    break
 
         return True
 
