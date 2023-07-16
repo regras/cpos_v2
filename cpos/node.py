@@ -154,6 +154,11 @@ class Node:
         return candidate
 
     def handle_new_block(self, block: Block):
+        round = self.bc.current_round
+        tolerance = self.bc.parameters.tolerance
+        if block.round not in range(round, round + tolerance + 1):
+            self.logger.info(f"discarding block {block.hash.hex()[0:8]} (outside of tolerance range)")
+            return False
         self.logger.info(f"trying to insert {block}")
         self.bc.insert(block)
 
