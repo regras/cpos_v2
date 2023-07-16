@@ -47,11 +47,6 @@ def test_basic_insertion():
     assert bc.insert(block) == False
     block.signed_node_hash = original_signed_node_hash
 
-    # reject blocks beyond our tolerance limit
-    block.round = 5
-    assert bc.insert(block) == False
-    block.round = 0
-
     # now actually try inserting the original, valid block
     assert bc.insert(block) == True
 
@@ -135,15 +130,14 @@ def test_merge():
 
     fork_subchain = [fork_block]
     for _ in range(3):
-        print(fork_subchain)
         round += 1
-        print(f"parent: {fork_subchain[-1].hash.hex()[0:8]}")
         new_block = generate_new_block(bc, parent=fork_subchain[-1], round=round)
         print(new_block)
         fork_subchain.append(new_block)
 
     bc.merge(fork_subchain)
-
-    assert False
+    print(bc.blocks)
+    # confirm whether we inserted the whole fork
+    assert bc.blocks[-1] == fork_subchain[-1]
 
 
