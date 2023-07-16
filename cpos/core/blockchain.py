@@ -109,9 +109,6 @@ class BlockChain:
             self._log_failed_insertion(block, "parent mismatch")
             return False
 
-        if len(self.blocks) > block.index:
-            self.logger.info(f"removing old block range ({block.index}, {len(self.blocks) - 1})")
-            self.blocks[block.index : ] = []
         self.logger.info(f"inserting {block}") 
         self.blocks.append(block)
 
