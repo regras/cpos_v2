@@ -50,3 +50,46 @@ def run_sortition(signed_node_hash: bytes, stake: int,
 
     # print(f"result: {i}")
     return i
+
+def confirmation_threshold(total_stake: int, tau: int, delta_r: int, threshold: float):
+    s = 1
+    p = tau / total_stake
+    while True:
+        k = min(((2**delta_r) * s) - 1, total_stake)
+        chance = 1 - cumulative_binom_dist(total_stake, k, p)
+        # print(f"s = {s} => fork chance = {chance}")
+
+        if chance <= threshold:
+            break
+        else:
+            s += 1
+    return s
+
+# this is unclear in Diego's dissertation; the following is my best guess
+def fork_threshold(total_stake: int, tau: int, delta_r: int, threshold: float = 0.95):
+    a = 1
+    p = tau / total_stake
+    while True:
+        k = min((tau + a) * delta_r - 1, total_stake)
+        chance = cumulative_binom_dist(total_stake, k, p)
+        print(f"chance: {chance}")
+        
+        if chance >= threshold:
+            break
+        else:
+            a += 1
+    return a
+
+def main():
+    total_stake = 8
+    tau = 4
+    for delta_r in range(1, 7):
+        print(f"===== delta_r = {delta_r} =====")
+        # s_min_confirmation = confirmation_threshold(total_stake, tau, delta_r, threshold=1e-06)
+        # print(f"s_min_confirmation = {s_min_confirmation}")
+        s_min_fork = fork_threshold(total_stake, tau, delta_r, threshold=0.95)
+        print(f"s_min_fork = {s_min_fork}")
+        
+
+if __name__ == "__main__":
+    main()
