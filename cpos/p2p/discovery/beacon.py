@@ -1,6 +1,5 @@
 import logging
 import socket
-from time import sleep
 from typing import cast
 
 from cpos.p2p.peer import Peer
@@ -40,6 +39,8 @@ class Beacon:
             except Exception as e:
                 self.logger.error(f"failed to deserialize message from {addr}:{port}, reason: {e}")
                 continue
+
+
             
             self.logger.debug(f"handling message: {msg}")
             if isinstance(msg, Hello):
@@ -47,13 +48,14 @@ class Beacon:
                 if peer not in self.peers:
                     self.peers.append(peer)
                     self.logger.info(f"registering new peer ({peer.id.hex()[0:8]}, {peer.ip}:{peer.port})")
-                reply = PeerList(self.peers)
-                self.logger.info(f"sending peerlist to ({peer.id.hex()[0:8]}, {peer.ip}:{peer.port}): {self.peers}")
-                try:
-                    sent = self.socket.sendto(reply.serialize(), (addr, port))
-                    self.logger.debug(f"sent {sent} bytes to ({peer.id.hex()[0:8]}, {peer.ip}:{peer.port}): {self.peers}")
-                except Exception as e:
-                    self.logger.error(f"unable to send reply to {peer}: {e}")
+
+            reply = PeerList(self.peers)
+            self.logger.info(f"sending peerlist to ({peer.id.hex()[0:8]}, {peer.ip}:{peer.port}): {self.peers}")
+            try:
+                sent = self.socket.sendto(reply.serialize(), (addr, port))
+                self.logger.debug(f"sent {sent} bytes to ({peer.id.hex()[0:8]}, {peer.ip}:{peer.port}): {self.peers}")
+            except Exception as e:
+                self.logger.error(f"unable to send reply to {peer}: {e}")
 
 
 
