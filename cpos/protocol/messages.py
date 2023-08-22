@@ -61,3 +61,19 @@ class PeerList(Message):
     def __init__(self, peerlist: list[tuple[str, str | int, bytes]]):
         self.code = MessageCode.PEER_LIST
         self.peerlist = peerlist
+
+# Ask for the last `block_count` blocks in peer's blockchain view
+class ResyncRequest(Message):
+    def __init__(self, peer_id: bytes, block_count: int):
+        self.peer_id = peer_id
+        self.block_count = block_count
+
+    def __str__(self):
+        return f"ResyncRequest(peer_id={self.peer_id})"
+
+    def __repr__(self):
+        return self.__str__()
+
+class ResyncResponse(Message):
+    def __init__(self, block_list: list[Block]):
+        self.block_list = block_list

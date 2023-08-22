@@ -1,4 +1,5 @@
 import argparse
+import signal
 
 from cpos.p2p.discovery.beacon import Beacon
 
@@ -8,6 +9,13 @@ def main():
     args = parser.parse_args()
 
     beacon = Beacon(port=args.port)
+
+    def sighandler(*args):
+        print(f"Received SIGTERM! Halting node...")
+        exit(1)
+
+    signal.signal(signal.SIGINT, sighandler)
+    signal.signal(signal.SIGTERM, sighandler)
 
     try:
         beacon.start()

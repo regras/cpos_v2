@@ -3,23 +3,23 @@ services:
     build: .
     # container_name: cpos_node
     deploy:
-      replicas: 10
+      replicas: 25
     volumes:
-      - ./demo:/cpos/demo
+      - .:/cpos
     ports:
       - "8888"
     environment:
-      - BEACON_IP=join.dca.fee.unicamp.br
+      - BEACON_IP=cpos_beacon
       - BEACON_PORT=9000
       - PORT=8888
-      - GENESIS_TIMESTAMP=1686584178
+      - GENESIS_TIMESTAMP=${START_TIME:-0}
     command: /bin/bash demo/run_node.sh
   beacon:
     build: .
     container_name: cpos_beacon
-    network_mode: "host"
+    # network_mode: "host"
     volumes:
-      - ./demo:/cpos/demo
+      - .:/cpos
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
