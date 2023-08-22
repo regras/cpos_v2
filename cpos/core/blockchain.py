@@ -172,12 +172,11 @@ class BlockChain:
             if block.proof_hash <= self.blocks[block.index].proof_hash:
                 self._log_failed_insertion(block, "smaller proof_hash")
                 return False
-            else:
-                self.blocks.pop()
 
         # self.logger.info(f"s: {self.unconfirmed_blocks}")
         self.logger.info(f"inserting {block}") 
         self.unconfirmed_blocks[block] = 0
+        self.blocks[block.index : ] = []
         self.blocks.append(block)
 
         return True
