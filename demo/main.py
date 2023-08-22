@@ -24,37 +24,21 @@ def main():
     config = NodeConfig(**vars(args))
     print(config)
     node = Node(config)
-
-    def ensure_log_dir():
-        cwd = os.getcwd()
-        log_dir = join(cwd, "demo/logs")
-        if not os.path.exists(log_dir):
-            print(f"creating log dir at {log_dir}")
-            os.mkdir(log_dir)
-
-    def dump_data():
-        cwd = os.getcwd()
-        log_dir = join(cwd, "demo/logs")
-        with open(f"demo/logs/node_{node.id.hex()[0:8]}.data", "wb") as file:
-            data = pickle.dump(node.bc, file)
+    sleep(5)
 
     def sighandler(*args):
-        print(f"Received SIGTERM! Halting node...")
-        node.halt()
+        node.logger.error(f"Received SIGTERM! Exiting...")
+        exit(1)
 
     signal.signal(signal.SIGINT, sighandler)
     signal.signal(signal.SIGTERM, sighandler)
 
-    # ensure_log_dir()
     try:
         node.greet_peers()
         node.start()
     except KeyboardInterrupt:
-        node.halt()
-        pass
+        exit(1)
 
-    print("exiting...")
-    dump_data()
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,9 @@
 from time import time
 from typing import Optional
 import logging
+import random
+import os
+import pickle
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cpos.core.block import Block, GenesisBlock
@@ -8,7 +11,7 @@ from cpos.core.blockchain import BlockChain, BlockChainParameters
 from cpos.core.transactions import TransactionList
 from cpos.p2p.network import Network
 
-from cpos.protocol.messages import BlockBroadcast, Hello, Message
+from cpos.protocol.messages import BlockBroadcast, Hello, Message, ResyncRequest, ResyncResponse
 
 from cpos.p2p.discovery.client import Client as DiscoveryClient
 from cpos.p2p.peer import Peer
@@ -67,11 +70,26 @@ class Node:
 
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
-        # - request a copy of the blockchain (implement sync)
-        params = BlockChainParameters(round_time=1, tolerance=2, tau=1, total_stake=10)
+        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
         self.bc: BlockChain = BlockChain(params, genesis=genesis)
+        self.state = State.LISTENING
+        self.missed_blocks: list[Block] = []
         
         self.should_halt: bool = False
+
+    # TODO: make the log_dir configurable
+    def dump_data(self, log_dir: str):
+        cwd = os.getcwd()
+        filepath = os.path.join(cwd, log_dir, f"node_{self.id.hex()[0:8]}.data")
+        self.logger.error(f"Dumping data to {filepath}...");
+        try:
+            with open(filepath, "wb") as file:
+                data = pickle.dumps(self.bc)
+                file.write(data)
+                file.flush()
+                file.close()
+        except Exception as e:
+            self.logger.error(f"Failed to dump data: {e}")
 
     # TODO: this should probably be moved into the cpos.p2p.network
     def _contact_beacon(self):
@@ -100,7 +118,10 @@ class Node:
                 self.network.connect(peer.ip, peer.port, peer.id)
 
     def send_message(self, dest_peer_id: bytes, msg: Message):
-        self.logger.debug(f"sending {msg} to peer {dest_peer_id.hex()[0:8]}")
+        if isinstance(msg, BlockBroadcast):
+            self.logger.debug(f"broadcasting {msg}")
+        else:
+            self.logger.debug(f"sending {msg} to peer {dest_peer_id.hex()[0:8]}")
         self.network.send(dest_peer_id, msg.serialize())
 
     def read_message(self) -> Optional[Message]:
@@ -160,7 +181,10 @@ class Node:
             self.logger.info(f"discarding block {block.hash.hex()[0:8]} (outside of tolerance range)")
             return False
         self.logger.info(f"trying to insert {block}")
-        self.bc.insert(block)
+        if not self.bc.insert(block):
+            self.missed_blocks.append(block)
+        # else:
+        #     self.broadcast_message(BlockBroadcast(block))
 
     def loop(self):
         round = self.bc.genesis.timestamp
@@ -168,10 +192,20 @@ class Node:
             if self.should_halt:
                 self.logger.error("halted")
                 break
+            
+            if self.state == State.LISTENING and len(self.missed_blocks) > 2 * self.bc.parameters.tau:
+                missed: Block = random.choice(self.missed_blocks)
+                owner_id = missed.owner_pubkey
+                self.send_message(owner_id, ResyncRequest(self.id, 5))
+                self.state = State.RESYNCING
+                self.missed_blocks = []
 
             self.bc.update_round()
             # on round change:
             if round != self.bc.current_round:
+                # TODO: make the log_dir configurable (and maybe
+                # don't log every single round...)
+                self.dump_data("demo/logs")
                 round = self.bc.current_round
                 new_block = self.generate_block()
                 if new_block is not None:
@@ -185,8 +219,20 @@ class Node:
             msg = Message.deserialize(raw)
             self.logger.debug(f"new message: {msg}")
 
-            if isinstance(msg, BlockBroadcast):
-                self.handle_new_block(msg.block)    
+            if self.state == State.LISTENING:
+                if isinstance(msg, BlockBroadcast):
+                    self.handle_new_block(msg.block)    
+                if isinstance(msg, ResyncRequest):
+                    peer_id = msg.peer_id
+                    # make sure we only send stuff after the genesis block
+                    count = max(msg.block_count, len(self.bc.blocks) - 1)
+                    block_list = self.bc.blocks[-1 * count : ]
+                    self.send_message(peer_id, ResyncResponse(block_list))
+
+            if self.state == State.RESYNCING:
+                if isinstance(msg, ResyncResponse):
+                    self.bc.merge(msg.block_list)
+                    self.state = State.LISTENING
 
     def start(self):
         self.should_halt = False

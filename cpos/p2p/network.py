@@ -10,7 +10,7 @@ class Network:
         logger = logging.getLogger(__name__ + id.hex())
         handler = logging.StreamHandler()
         formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [{self.id.hex()[0:8]}] %(message)s")
-        logger.setLevel(logging.INFO)
+        logger.setLevel(logging.WARNING)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         self.logger = logger
@@ -47,6 +47,7 @@ class Network:
                 self.socket.send_multipart([peer_id, bytes(), msg], zmq.NOBLOCK)
             except Exception as e:
                 self.logger.error(f"failed to send message to peer {peer_id.hex()[0:8]} ({e})")
+                self.logger.error(f"known_peers: {self.known_peers}")
                 
         else:
             self.logger.error(f"failed to send message to unknown peer: {peer_id.hex()}")

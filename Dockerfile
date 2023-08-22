@@ -4,11 +4,11 @@ FROM mwalbeck/python-poetry:1.5-3.11
 
 WORKDIR /cpos
 
-VOLUME ["/cpos/demo"]
+VOLUME ["/cpos"]
 
 COPY . /cpos
 
-RUN chown -R root "/cpos"
+# RUN chown -R root "/cpos"
 
 RUN poetry install
 
