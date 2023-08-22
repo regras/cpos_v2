@@ -1,5 +1,5 @@
 from cpos.core.block import Block, GenesisBlock
-from cpos.core.sortition import run_sortition
+from cpos.core.sortition import fork_threshold, run_sortition, confirmation_threshold
 from time import time
 from typing import Optional
 from collections import OrderedDict
@@ -14,6 +14,8 @@ class BlockChainParameters:
         self.tau = tau
         self.total_stake = total_stake
         pass
+
+
 
 class BlockChain:
     def __init__(self, parameters: BlockChainParameters, genesis: Optional[GenesisBlock] = None):
@@ -61,40 +63,35 @@ class BlockChain:
         # verify whether we can confirm the oldest unconfirmed block or
         # whether a fork has been detected
         # (this fork detection logic really, REALLY needs to be its own class)
+
+        # should only happen if the chain only has the genesis block
         if self.last_confirmed_block == self.blocks[-1]:
             return
-        oldest = self.blocks[self.last_confirmed_block.index + 1]
-        delta_r = round - oldest.round - 1
 
-        # refer to Martins (2021) p. 84
-        # this assumes tau = 10; TODO: implement calculation of parameters
-        successful_avg_thresh = {
-            1: 15.0,
-            2: 12.0,
-            3: 10.0,
-            4: 10.0,
-            5: 9.0,
-            6: 9.0,
-        }
+        # oldest unconfirmed block
+        oldest = self.blocks[self.last_confirmed_block.index + 1]
+        delta_r = round - oldest.round
+
         if delta_r > 0 and oldest.index > 0:
             successful_avg = self.unconfirmed_blocks[oldest] / delta_r
             self.logger.info(f"oldest unconfirmed block: {oldest}, delta_r: {delta_r}, s: {successful_avg}")
-            # self.logger.info(f"successful_avg: {successful_avg}")
-            if successful_avg > successful_avg_thresh.get(delta_r, 9.0):
+            # TODO: make the epsilon threshold variable
+            conf_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
+                                   tau=self.parameters.tau,
+                                   delta_r=delta_r,
+                                   threshold=1e-6)
+            self.logger.info(f"s_min: {conf_thresh}")
+            if successful_avg > conf_thresh:
                 self.logger.info(f"confirmed block {oldest}")
-                self.last_confirmed_block = self.blocks[oldest.index + 1]
+                self.last_confirmed_block = self.blocks[oldest.index]
                 self.unconfirmed_blocks.pop(oldest)
 
-            min_successful_avg = {
-                1: 5.0,
-                2: 6.0,
-                3: 7.0,
-                4: 7.0,
-                5: 7.0,
-                6: 8.0,
-            }
+            fork_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
+                                   tau=self.parameters.tau,
+                                   delta_r=delta_r,
+                                   threshold=0.95)
 
-            if successful_avg < min_successful_avg.get(delta_r, 8.0):
+            if successful_avg < fork_thresh:
                 self.fork_detected = True
 
     def _log_failed_verification(self, block: Block, reason: str):
@@ -165,7 +162,7 @@ class BlockChain:
             preceding_blocks = self.blocks[0 : block.index]
             for b in preceding_blocks:
                 if b in self.unconfirmed_blocks:
-                    self.unconfirmed_blocks[b] += 1
+                    self.unconfirmed_blocks[b] += winning_tickets
 
         # in case we already have a block that was added this round
         if len(self.blocks) == block.index + 1:

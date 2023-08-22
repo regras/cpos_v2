@@ -70,7 +70,8 @@ class Node:
 
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
-        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
+        # params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
+        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=30)
         self.bc: BlockChain = BlockChain(params, genesis=genesis)
         self.state = State.LISTENING
         self.missed_blocks: list[Block] = []
@@ -193,16 +194,19 @@ class Node:
                 self.logger.error("halted")
                 break
             
-            if self.state == State.LISTENING and len(self.missed_blocks) > 2 * self.bc.parameters.tau:
+            # if we detect a fork, resync with the owner of a random missed block
+            if self.state == State.LISTENING and self.bc.fork_detected and self.missed_blocks:
                 missed: Block = random.choice(self.missed_blocks)
                 owner_id = missed.owner_pubkey
                 self.send_message(owner_id, ResyncRequest(self.id, 5))
                 self.state = State.RESYNCING
                 self.missed_blocks = []
+                self.bc.fork_detected = False
 
             self.bc.update_round()
             # on round change:
             if round != self.bc.current_round:
+                self.logger.debug(f"state: {self.state}")
                 # TODO: make the log_dir configurable (and maybe
                 # don't log every single round...)
                 self.dump_data("demo/logs")
@@ -233,6 +237,14 @@ class Node:
                 if isinstance(msg, ResyncResponse):
                     self.bc.merge(msg.block_list)
                     self.state = State.LISTENING
+                # we need to reply to ResyncRequest in order to avoid a
+                # distributed deadlock
+                if isinstance(msg, ResyncRequest):
+                    peer_id = msg.peer_id
+                    # make sure we only send stuff after the genesis block
+                    count = max(msg.block_count, len(self.bc.blocks) - 1)
+                    block_list = self.bc.blocks[-1 * count : ]
+                    self.send_message(peer_id, ResyncResponse(block_list))
 
     def start(self):
         self.should_halt = False
