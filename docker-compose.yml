@@ -12,7 +12,6 @@ services:
       - BEACON_IP=cpos_beacon
       - BEACON_PORT=9000
       - PORT=8888
-      - GENESIS_TIMESTAMP=${START_TIME:-0}
     command: /bin/bash demo/run_node.sh
   beacon:
     build: .
