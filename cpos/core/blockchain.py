@@ -188,8 +188,10 @@ class BlockChain:
 
         # self.logger.info(f"s: {self.unconfirmed_blocks}")
         self.logger.info(f"inserting {block}") 
-        self.unconfirmed_blocks[block] = 0
         self.blocks[block.index : ] = []
+        self.unconfirmed_blocks[block] = 0
+        if block.index <= self.last_confirmed_block.index:
+            self.last_confirmed_block = self.blocks[block.index - 1]
         self.blocks.append(block)
 
         return True
