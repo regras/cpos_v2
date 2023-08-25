@@ -18,6 +18,14 @@ class BlockChainParameters:
 
 
 class BlockChain:
+    # TODO: make this faster? shouldn't be an issue once we
+    #       implement SQL database support
+    def __contains__(self, block: Block):
+        for b in self.blocks:
+            if b.hash == block.hash:
+                return True
+        return False
+
     def __init__(self, parameters: BlockChainParameters, genesis: Optional[GenesisBlock] = None):
         logger = logging.getLogger(__name__)
         handler = logging.StreamHandler()
@@ -142,6 +150,8 @@ class BlockChain:
 
     # try to insert a block at the end of the chain
     def insert(self, block: Block) -> bool:
+        if block in self:
+            self._log_failed_insertion(block, "already in local chain")
         if block.index == 0:
             self._log_failed_insertion(block, "new genesis block")
             return False 
