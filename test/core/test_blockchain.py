@@ -21,7 +21,7 @@ def test_basic_insertion():
                   transactions=tx,
                   owner_pubkey=pubkey.public_bytes_raw(),
                   signed_node_hash=b"",
-                  round=0,
+                  round=1,
                   index=1,
                   ticket_number=1)
     block.signed_node_hash = privkey.sign(block.node_hash)
@@ -103,7 +103,7 @@ def test_merge():
                       transactions=tx,
                       owner_pubkey=pubkey.public_bytes_raw(),
                       signed_node_hash=b"",
-                      round=round,
+                      round=round+1,
                       index=parent.index+1,
                       ticket_number=1)
         new_block.signed_node_hash = privkey.sign(new_block.node_hash)
