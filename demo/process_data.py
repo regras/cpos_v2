@@ -22,6 +22,8 @@ def plot_bc(bc: BlockChain, filename: str):
     dot.format = "png"
     for block in bc.blocks:
         print(block)
+        if block == bc.last_confirmed_block:
+            print("=== [UNCONFIRMED BLOCKS] ===")
         dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> <TR> <TD> owner: [{block.owner_pubkey.hex()[0:8]}] </TD> </TR> </TABLE>>")
 
     for i in range(0, len(bc.blocks) - 1):
