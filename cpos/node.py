@@ -184,8 +184,8 @@ class Node:
         self.logger.info(f"trying to insert {block}")
         if not self.bc.insert(block):
             self.missed_blocks.append(block)
-        # else:
-        #     self.broadcast_message(BlockBroadcast(block))
+        else:
+            self.broadcast_message(BlockBroadcast(block))
 
     def loop(self):
         round = self.bc.genesis.timestamp
