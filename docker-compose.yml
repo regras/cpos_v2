@@ -2,6 +2,8 @@ services:
   node:
     build: .
     # container_name: cpos_node
+    depends_on:
+      - beacon
     deploy:
       replicas: 25
     volumes:
