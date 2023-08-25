@@ -51,7 +51,7 @@ class Node:
         logger = logging.getLogger(__name__ + self.id.hex())
         handler = logging.StreamHandler()
         formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [{self.id.hex()[0:8]}] %(message)s")
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         self.logger = logger
@@ -82,7 +82,7 @@ class Node:
     def dump_data(self, log_dir: str):
         cwd = os.getcwd()
         filepath = os.path.join(cwd, log_dir, f"node_{self.id.hex()[0:8]}.data")
-        self.logger.error(f"Dumping data to {filepath}...");
+        self.logger.warning(f"Dumping data to {filepath}...");
         try:
             with open(filepath, "wb") as file:
                 data = pickle.dumps(self.bc)
