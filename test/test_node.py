@@ -2,6 +2,7 @@ from time import sleep
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cpos.node import Node, NodeConfig
 import pytest
+from cpos.p2p.peer import Peer
 
 from cpos.protocol.messages import Hello
 
@@ -9,7 +10,7 @@ from cpos.protocol.messages import Hello
 #       and seems to fail randomly (although rarely); consider
 #       skipping
 def test_basic_greeting():
-    ports: list[str] = ["8892", "8893", "8894", "8895"]
+    ports: list[int] = [8892, 8893, 8894, 8895]
     privkeys: list[Ed25519PrivateKey] = []
     peers = []
     nodes: list[Node] = []
@@ -18,7 +19,7 @@ def test_basic_greeting():
         pubkey = privkey.public_key().public_bytes_raw()
         privkeys.append(privkey)
         ip = "localhost"
-        peers.append((ip, port, pubkey))
+        peers.append(Peer(ip, port, pubkey))
 
     for (privkey, port)  in zip(privkeys, ports):
         config = NodeConfig(port=port, privkey=privkey.private_bytes_raw(), peerlist=peers)
@@ -45,7 +46,7 @@ def test_basic_greeting():
                 break
             msg = Hello.deserialize(msg_raw)
             print(msg)
-            p.remove(str(msg.peer_port))
+            p.remove(int(msg.peer_port))
         # check that we received greetings from all peers
         assert len(p) == 0
 
