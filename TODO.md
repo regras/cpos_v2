@@ -10,5 +10,5 @@
 - Investigate race condition in confirmation mechanism where nodes take some time to synchronize between each other,
   messing up the average successful sortition statistics and making it impossible to confirm blocks
 - Make data dumping better/more configurable while we don't implement database communication
-- Write better tests with some kind of mock infrastructure (especially for core/blockchain) so that we can test
-  the general behavior of the module without having to hard-code specific examples
+- Write better tests with some kind of mock infrastructure (especially for core/blockchain) so that we can test the general behavior of the module without having to hard-code specific examples
+    - Currently the `[core/blockchain]` tests are failing because of hard-coded pubkeys no longer passing tests after some implementation logic changes
