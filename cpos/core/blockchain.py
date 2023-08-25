@@ -174,11 +174,17 @@ class BlockChain:
                 if b in self.unconfirmed_blocks:
                     self.unconfirmed_blocks[b] += winning_tickets
 
-        # in case we already have a block that was added this round
-        if len(self.blocks) == block.index + 1:
+        # in case there is already a block present at block.index
+        if len(self.blocks) > block.index:
             if block.proof_hash <= self.blocks[block.index].proof_hash:
                 self._log_failed_insertion(block, "smaller proof_hash")
                 return False
+
+        # reject block if it was added in the same round as the parent
+        parent_idx = block.index - 1
+        if block.round <= self.blocks[parent_idx].round:
+            self._log_failed_insertion(block, "same round as parent")
+            return False
 
         # self.logger.info(f"s: {self.unconfirmed_blocks}")
         self.logger.info(f"inserting {block}") 
