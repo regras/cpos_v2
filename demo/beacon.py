@@ -23,6 +23,7 @@ def main():
         sleep(10)
         beacon.halt()
         beacon.broadcast_random_peers(5)
+        # beacon.broadcast_peerlist()
     except KeyboardInterrupt:
         print("exiting...")
 
