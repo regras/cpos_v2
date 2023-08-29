@@ -25,6 +25,7 @@ class NodeConfig:
         self.beacon_ip: Optional[str] = kwargs.get("beacon_ip", None)
         self.beacon_port: Optional[int] = kwargs.get("beacon_port", None)
         self.genesis_timestamp: Optional[int] = kwargs.get("genesis_timestamp", None)
+        self.total_rounds: Optional[int] = kwargs.get("total_rounds", None)
 
     def __str__(self):
         return str(self.__dict__)
@@ -71,10 +72,13 @@ class Node:
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
         # params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
-        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=30)
+        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
         self.bc: BlockChain = BlockChain(params, genesis=genesis)
         self.state = State.LISTENING
         self.missed_blocks: list[Block] = []
+        
+        self.message_count = 0
+        self.total_message_bytes = 0
         
         self.should_halt: bool = False
 
@@ -85,7 +89,7 @@ class Node:
         self.logger.warning(f"Dumping data to {filepath}...");
         try:
             with open(filepath, "wb") as file:
-                data = pickle.dumps(self.bc)
+                data = pickle.dumps((self.bc, self.message_count, self.total_message_bytes))
                 file.write(data)
                 file.flush()
                 file.close()
@@ -190,6 +194,9 @@ class Node:
     def loop(self):
         round = self.bc.genesis.timestamp
         while True:
+            if self.config.total_rounds is not None and self.bc.current_round >= self.config.total_rounds:
+                self.should_halt = True
+
             if self.should_halt:
                 self.logger.error("halted")
                 break
@@ -220,6 +227,10 @@ class Node:
             raw = self.network.read(timeout=200)
             if raw is None:
                 continue
+
+            self.message_count += 1
+            self.total_message_bytes += len(raw)
+
             msg = Message.deserialize(raw)
             self.logger.debug(f"new message: {msg}")
 

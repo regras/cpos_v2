@@ -49,6 +49,7 @@ class BlockChain:
         # better naming later
         self.unconfirmed_blocks: OrderedDict[Block, int] = OrderedDict()
         self.last_confirmed_block: Block = self.genesis
+        self.last_confirmation_delay: int = 0
         self.fork_detected = False
 
         self.current_round: int = 0
@@ -92,6 +93,7 @@ class BlockChain:
             if successful_avg > conf_thresh:
                 self.logger.info(f"confirmed block {oldest}")
                 self.last_confirmed_block = self.blocks[oldest.index]
+                self.last_confirmation_delay = self.current_round - self.last_confirmed_block.round
                 self.unconfirmed_blocks.pop(oldest)
 
             fork_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
