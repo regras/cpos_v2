@@ -19,6 +19,7 @@ def main():
     node_config.add_argument("--genesis-timestamp", type=int, required=True)
     node_config.add_argument("--beacon-ip", help="the IP address of the network beacon", required=True, type=str)
     node_config.add_argument("--beacon-port", help="the port of the network beacon", required=True, type=int)
+    node_config.add_argument("--total-rounds", help="total number of rounds before halting", required=False, type=int)
     args = parser.parse_args()
     print(vars(args))
     config = NodeConfig(**vars(args))
