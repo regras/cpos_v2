@@ -1,22 +1,11 @@
 # cpos_v2
 A new and refactored version of CPoS.
 
-## Run with Docker
+## Dependencies
 
-### Running a beacon
-
-Run the following to build+run the Docker image, as well as spawn a beacon instance (you might need admin privileges, i.e. `sudo`):
-
-```
-$ docker-compose run beacon
-```
-
-## Requirements
-We use [Poetry](https://python-poetry.org/docs/) to build the project, manage dependencies and run unit tests. To install it on Linux/WSL, run
-
-```
-$ curl -sSL https://install.python-poetry.org | python3 -
-```
+- Docker 24.0
+- Docker Compose 2.20
+- Poetry 1.6.1
 
 ## Building
 
@@ -34,20 +23,8 @@ $ poetry shell
 
 ## Running
 
-You can run code within any file in the project just like you would with any regular Python script:
+To launch the demo blockchain:
 
 ```
-$ python cpos/<path-to-file>/<file>.py
-```
-
-We use [pytest](https://docs.pytest.org/en/7.3.x/) for unit testing. To run all tests, do
-
-```
-$ pytest
-```
-
-You can also run specific tests with
-
-```
-$ pytest test/<path-to-test>
+$ docker compose up
 ```
