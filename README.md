@@ -28,3 +28,11 @@ To launch the demo blockchain:
 ```
 $ docker compose up
 ```
+
+It will stop running when it gets to round 30. To process the generated data, run (make sure to do it within a Poetry shell environment):
+
+```
+$ python demo/process_data.py
+```
+
+This will also generate a bunch of images inside `demo/logs`.
