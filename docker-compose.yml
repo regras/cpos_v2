@@ -7,6 +7,8 @@ services:
       - beacon
     deploy:
       replicas: 25
+      placement:
+            max_replicas_per_node: 10
     volumes:
       - .:/cpos
     ports:
