@@ -9,8 +9,8 @@ services:
       replicas: 25
       placement:
             max_replicas_per_node: 10
-    volumes:
-      - ~/cpos_v2:/cpos
+    # volumes:
+    #   - .:/cpos
     ports:
       - "8888"
     environment:
@@ -23,8 +23,8 @@ services:
     build: .
     container_name: cpos_beacon
     # network_mode: "host"
-    volumes:
-      - ~/cpos_v2:/cpos
+    # volumes:
+    #   - .:/cpos
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
