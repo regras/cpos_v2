@@ -1,5 +1,6 @@
 services:
   node:
+    image: georgejuniorg/cpos_v2
     build: .
     # container_name: cpos_node
     depends_on:
@@ -16,6 +17,7 @@ services:
       - PORT=8888
     command: /bin/bash demo/run_node.sh
   beacon:
+    image: georgejuniorg/cpos_v2
     build: .
     container_name: cpos_beacon
     # network_mode: "host"
