@@ -37,3 +37,7 @@ services:
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
+
+networks:
+  cpos_test:
+    driver: overlay
