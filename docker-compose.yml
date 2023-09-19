@@ -2,6 +2,7 @@ services:
   node:
     image: georgejuniorg/cpos_v2
     build: .
+    tty: true
     # container_name: cpos_node
     depends_on:
       - beacon
@@ -21,6 +22,7 @@ services:
   beacon:
     image: georgejuniorg/cpos_v2
     build: .
+    tty: true
     container_name: cpos_beacon
     # network_mode: "host"
     # volumes:
