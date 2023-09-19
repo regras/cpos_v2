@@ -32,7 +32,7 @@ class Client:
         try:
             self.socket.sendto(msg.serialize(), (self.beacon_ip, self.beacon_port))
         except Exception as e:
-            self.logger.error(f"failed to contact beacon: {e}")
+            self.logger.error(f"[{self.id}] failed to contact beacon: {e}")
             return None
 
         wait = 2
