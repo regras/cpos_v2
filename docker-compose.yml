@@ -25,10 +25,10 @@ services:
     build: .
     tty: true
     container_name: cpos_beacon
-    # deploy:
-    #   placement:
-    #       constraints:
-    #         - node.labels.mynode == join
+    deploy:
+      placement:
+          constraints:
+            - node.labels.mynode == join
     # network_mode: "host"
     # volumes:
     #   - .:/cpos
