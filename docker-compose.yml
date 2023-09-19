@@ -36,5 +36,5 @@ services:
     ports:
       - "30030:9000"
     environment:
-      - PORT=9000
+      - PORT=30030
     command: /bin/bash demo/run_beacon.sh
