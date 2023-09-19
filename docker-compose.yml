@@ -10,6 +10,8 @@ services:
       replicas: 5
       placement:
             max_replicas_per_node: 1
+    networks:
+      - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
@@ -30,6 +32,8 @@ services:
           constraints:
             - node.labels.mynode == join
     # network_mode: "host"
+    networks:
+      - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
