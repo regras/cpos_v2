@@ -16,7 +16,7 @@ services:
       - "8888"
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
-      - BEACON_IP=beacon
+      - BEACON_IP=cpos_beacon
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
