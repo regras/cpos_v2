@@ -15,7 +15,8 @@ services:
     ports:
       - "8888"
     environment:
-      - BEACON_IP=join.dca.fee.unicamp.br
+      # - BEACON_IP=join.dca.fee.unicamp.br
+      - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
@@ -24,10 +25,10 @@ services:
     build: .
     tty: true
     container_name: cpos_beacon
-    deploy:
-      placement:
-          constraints:
-            - node.labels.mynode == join
+    # deploy:
+    #   placement:
+    #       constraints:
+    #         - node.labels.mynode == join
     # network_mode: "host"
     # volumes:
     #   - .:/cpos
