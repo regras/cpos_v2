@@ -9,7 +9,7 @@ def main():
     parser.add_argument("-p", "--port", help="which port to bind the CPoS beacon to", type=int, required=True)
     args = parser.parse_args()
 
-    beacon = Beacon(port=args.port, instant_reply=False)
+    beacon = Beacon(port=args.port, instant_reply=True)
 
     def sighandler(*args):
         print(f"Received SIGTERM! Halting node...")
