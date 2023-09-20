@@ -9,19 +9,20 @@ services:
     deploy:
       replicas: 5
       placement:
-            max_replicas_per_node: 1
-            # constraints:
+          max_replicas_per_node: 1
+          constraints:
+            - node.role == worker
             #   - node.labels.mynode == deterlab
-    networks:
-      - cpos_test
+    # networks:
+    #   - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
       - "8888"
     environment:
-      # - BEACON_IP=join.dca.fee.unicamp.br
-      - BEACON_IP=beacon
-      - BEACON_PORT=9000
+      - BEACON_IP=join.dca.fee.unicamp.br
+      # - BEACON_IP=beacon
+      - BEACON_PORT=30030
       - PORT=8888
     command: /bin/bash demo/run_node.sh
   beacon:
@@ -32,18 +33,18 @@ services:
     deploy:
       placement:
           constraints:
-            - node.labels.mynode == join
+            - node.role == manager
     # network_mode: "host"
-    networks:
-      - cpos_test
+    # networks:
+    #   - cpos_test
     # volumes:
     #   - .:/cpos
-    # ports:
-    #   - "9000"
+    ports:
+      - "30030:30030"
     environment:
-      - PORT=9000
+      - PORT=30030
     command: /bin/bash demo/run_beacon.sh
 
-networks:
-  cpos_test:
-    driver: overlay
+# networks:
+#   cpos_test:
+#     driver: overlay
