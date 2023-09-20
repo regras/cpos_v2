@@ -20,9 +20,9 @@ services:
     ports:
       - "8888"
     environment:
-      - BEACON_IP=join.dca.fee.unicamp.br
-      # - BEACON_IP=beacon
-      - BEACON_PORT=30030
+      # - BEACON_IP=join.dca.fee.unicamp.br
+      - BEACON_IP=beacon
+      - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
   beacon:
@@ -39,10 +39,10 @@ services:
     #   - cpos_test
     # volumes:
     #   - .:/cpos
-    ports:
-      - "30030:30030"
+    # ports:
+    #   - "9000:9000"
     environment:
-      - PORT=30030
+      - PORT=9000
     command: /bin/bash demo/run_beacon.sh
 
 # networks:
