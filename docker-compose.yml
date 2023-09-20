@@ -11,7 +11,7 @@ services:
       placement:
             max_replicas_per_node: 1
             constraints:
-            - node.labels.mynode == deterlab
+              - node.labels.mynode == deterlab
     networks:
       - cpos_test
     # volumes:
