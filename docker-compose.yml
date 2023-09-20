@@ -4,8 +4,8 @@ services:
     build: .
     tty: true
     # container_name: cpos_node
-    depends_on:
-      - beacon
+    # depends_on:
+    #   - beacon
     deploy:
       replicas: 5
       placement:
