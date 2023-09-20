@@ -7,9 +7,11 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 5
+      replicas: 1
       placement:
             max_replicas_per_node: 1
+            constraints:
+            - node.labels.mynode == deterlab
     networks:
       - cpos_test
     # volumes:
