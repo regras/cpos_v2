@@ -1,4 +1,23 @@
 services:
+  beacon:
+    image: georgejuniorg/cpos_v2
+    build: .
+    tty: true
+    #container_name: cpos_beacon
+    deploy:
+      placement:
+          constraints:
+            - node.role == manager
+    # network_mode: "host"
+    # networks:
+    #   - cpos_test
+    # volumes:
+    #   - .:/cpos
+    ports:
+      - "9000:9000"
+    environment:
+      - PORT=9000
+    command: /bin/bash demo/run_beacon.sh
   node:
     image: georgejuniorg/cpos_v2
     build: .
@@ -13,8 +32,8 @@ services:
           constraints:
             - node.role == worker
             #   - node.labels.mynode == deterlab
-    networks:
-      - cpos_test
+    # networks:
+    #   - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
@@ -25,26 +44,7 @@ services:
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
-  beacon:
-    image: georgejuniorg/cpos_v2
-    build: .
-    tty: true
-    #container_name: cpos_beacon
-    deploy:
-      placement:
-          constraints:
-            - node.role == manager
-    # network_mode: "host"
-    networks:
-      - cpos_test
-    # volumes:
-    #   - .:/cpos
-    ports:
-      - "9000:9000"
-    environment:
-      - PORT=9000
-    command: /bin/bash demo/run_beacon.sh
 
-networks:
-  cpos_test:
-    driver: overlay
+# networks:
+#   cpos_test:
+#     driver: overlay
