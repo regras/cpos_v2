@@ -39,8 +39,8 @@ services:
     #   - cpos_test
     # volumes:
     #   - .:/cpos
-    # ports:
-    #   - "9000:9000"
+    ports:
+      - "9000:9000"
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
