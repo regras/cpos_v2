@@ -9,8 +9,8 @@ services:
           constraints:
             - node.role == manager
     # network_mode: "host"
-    networks:
-      - cpos_test
+    # networks:
+    #   - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
@@ -32,12 +32,12 @@ services:
           constraints:
             - node.role == worker
             - node.labels.mynode == deterlab
-    networks:
-      - cpos_test
+    # networks:
+    #   - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
-      - "8888"
+      - "8888:8888"
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
       - BEACON_IP=beacon
@@ -45,7 +45,7 @@ services:
       - PORT=8888
     command: /bin/bash demo/run_node.sh
 
-networks:
-  cpos_test:
-    driver: overlay
-    attachable: true
+# networks:
+#   cpos_test:
+#     driver: overlay
+#     attachable: true
