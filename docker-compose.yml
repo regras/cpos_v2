@@ -48,5 +48,4 @@ services:
 networks:
   cpos_test:
     driver: overlay
-    external: true
     attachable: true
