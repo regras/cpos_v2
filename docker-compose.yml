@@ -9,8 +9,8 @@ services:
           constraints:
             - node.role == manager
     # network_mode: "host"
-    # networks:
-    #   - cpos_test
+    networks:
+      - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
@@ -26,14 +26,14 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 1
+      replicas: 2
       placement:
           max_replicas_per_node: 1
           constraints:
             - node.role == worker
             - node.labels.mynode == deterlab
-    # networks:
-    #   - cpos_test
+    networks:
+      - cpos_test
     # volumes:
     #   - .:/cpos
     ports:
@@ -45,7 +45,8 @@ services:
       - PORT=8888
     command: /bin/bash demo/run_node.sh
 
-# networks:
-#   cpos_test:
-#     driver: overlay
-#     internal: true
+networks:
+  cpos_test:
+    driver: overlay
+    external: true
+    attachable: true
