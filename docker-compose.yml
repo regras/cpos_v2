@@ -37,7 +37,7 @@ services:
     # volumes:
     #   - .:/cpos
     ports:
-      - "8888:8888"
+      - "8888"
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
       - BEACON_IP=beacon
