@@ -24,8 +24,7 @@ services:
     tty: true
     # container_name: cpos_node
     depends_on:
-      beacon:
-        condition: service_healthy
+      - beacon
     deploy:
       replicas: 2
       placement:
