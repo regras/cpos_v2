@@ -8,7 +8,7 @@ services:
       placement:
           constraints:
             - node.role == manager
-    network_mode: "host"
+    # network_mode: "host"
     # networks:
     #   - cpos_test
     # volumes:
@@ -24,7 +24,8 @@ services:
     tty: true
     # container_name: cpos_node
     depends_on:
-      - beacon
+      beacon:
+        condition: service_healthy
     deploy:
       replicas: 2
       placement:
@@ -39,8 +40,8 @@ services:
     ports:
       - "8888:8888"
     environment:
-      - BEACON_IP=join.dca.fee.unicamp.br
-      # - BEACON_IP=beacon
+      # - BEACON_IP=join.dca.fee.unicamp.br
+      - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
