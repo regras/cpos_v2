@@ -12,3 +12,4 @@ COPY . /cpos
 
 RUN poetry install
 
+EXPOSE 8888
