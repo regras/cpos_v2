@@ -26,7 +26,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 20
+      replicas: 30
       placement:
           max_replicas_per_node: 1
           constraints:
