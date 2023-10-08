@@ -38,7 +38,10 @@ services:
     # volumes:
     #   - .:/cpos
     ports:
-      - "8888:8888"
+      # - "8888:8888"
+      - target: 8888
+        published: 8888
+        mode: host
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
       - BEACON_IP=beacon
@@ -48,5 +51,6 @@ services:
 
 networks:
   cpos_test:
+    # external: true
     driver: overlay
 #     attachable: true
