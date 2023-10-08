@@ -26,7 +26,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 3
+      replicas: 20
       placement:
           max_replicas_per_node: 1
           constraints:
@@ -38,10 +38,10 @@ services:
     # volumes:
     #   - .:/cpos
     ports:
-      # - "8888:8888"
-      - target: 8888
-        published: 8888
-        mode: host
+      - "8888:8888"
+      # - target: 8888
+      #   published: 8888
+      #   mode: host
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
       - BEACON_IP=beacon
