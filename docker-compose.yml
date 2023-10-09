@@ -11,7 +11,6 @@ services:
     # network_mode: "host"
     networks:
       - host
-      - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
