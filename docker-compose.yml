@@ -53,4 +53,4 @@ networks:
   cpos_test:
     # external: true
     driver: overlay
-#     attachable: true
+    attachable: true
