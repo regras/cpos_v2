@@ -13,8 +13,8 @@ services:
       - cpos_test
     # volumes:
     #   - .:/cpos
-    ports:
-      - "9000:9000"
+    # ports:
+    #   - "9000:9000"
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
@@ -37,11 +37,11 @@ services:
       - cpos_test
     # volumes:
     #   - .:/cpos
-    # ports:
+    ports:
       # - "8888:8888"
-      # - target: 8888
-      #   published: 8888
-      #   mode: host
+      - target: 8888
+        published: 8888
+        mode: host
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
       - BEACON_IP=beacon
