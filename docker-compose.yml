@@ -26,7 +26,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 20
+      replicas: 2
       placement:
           max_replicas_per_node: 1
           constraints:
@@ -53,4 +53,4 @@ networks:
   cpos_test:
     # external: true
     driver: overlay
-    attachable: true
+    # attachable: true
