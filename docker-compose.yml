@@ -10,8 +10,8 @@ services:
             - node.role == manager
     # network_mode: "host"
     networks:
-      # - host
-      - cpos_test
+      - host
+      # - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
@@ -28,7 +28,7 @@ services:
       - beacon
     deploy:
       replicas: 20
-      endpoint_mode: dnsrr
+      # endpoint_mode: dnsrr
       placement:
           max_replicas_per_node: 1
           constraints:
@@ -36,29 +36,27 @@ services:
             # - node.labels.mynode == deterlab
     # network_mode: "host"
     networks:
-      - cpos_test
+      # - cpos_test
+      - host
     # volumes:
     #   - .:/cpos
-    ports:
+    # ports:
     #   - "8888:8888"
-      - target: 8888
-        published: 8888
-        mode: host
+      # - target: 8888
+      #   published: 8888
+      #   mode: host
     environment:
-      # - BEACON_IP=join.dca.fee.unicamp.br
-      - BEACON_IP=beacon
+      - BEACON_IP=join.dca.fee.unicamp.br
+      # - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
 
 networks:
-  cpos_test:
-  # host:
-  #   name: host
-    name: cpos_test
-    # external: true
-    driver: overlay
-    attachable: true
-  # host:
-  #   name: host
-  #   external: true
+  # cpos_test:
+  #   name: cpos_test
+  #   driver: overlay
+  #   attachable: true
+  host:
+    name: host
+    external: true
