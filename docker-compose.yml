@@ -51,25 +51,25 @@ services:
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
-node2:
-  image: georgejuniorg/cpos_v2
-  build: .
-  tty: true
-  depends_on:
-    - beacon
-  deploy:
-    replicas: 20
-    placement:
-        max_replicas_per_node: 1
-        constraints:
-          - node.role == worker
-  networks:
-    - host
-  environment:
-    - BEACON_IP=join.dca.fee.unicamp.br
-    - BEACON_PORT=9000
-    - PORT=8889
-  command: /bin/bash demo/run_node.sh
+  node2:
+    image: georgejuniorg/cpos_v2
+    build: .
+    tty: true
+    depends_on:
+      - beacon
+    deploy:
+      replicas: 20
+      placement:
+          max_replicas_per_node: 1
+          constraints:
+            - node.role == worker
+    networks:
+      - host
+    environment:
+      - BEACON_IP=join.dca.fee.unicamp.br
+      - BEACON_PORT=9000
+      - PORT=8889
+    command: /bin/bash demo/run_node.sh
 
 networks:
   # cpos_test:
