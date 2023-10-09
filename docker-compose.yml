@@ -54,6 +54,6 @@ networks:
   # host:
   #   name: host
     name: docker_gwbridge
-    external: true
+    # external: true
     # driver: host
     # attachable: true
