@@ -10,7 +10,7 @@ services:
             - node.role == manager
     # network_mode: "host"
     networks:
-      - host
+      - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
@@ -34,7 +34,7 @@ services:
             # - node.labels.mynode == deterlab
     # network_mode: "host"
     networks:
-      - host
+      - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
@@ -50,8 +50,9 @@ services:
     command: /bin/bash demo/run_node.sh
 
 networks:
-  host:
-    name: host
+  cpos_test:
+  # host:
+  #   name: host
     external: true
     # driver: host
     # attachable: true
