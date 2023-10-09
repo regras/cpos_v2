@@ -10,7 +10,8 @@ services:
             - node.role == manager
     # network_mode: "host"
     networks:
-      - docker_gwbridge
+      - host
+      - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
@@ -34,7 +35,7 @@ services:
             # - node.labels.mynode == deterlab
     # network_mode: "host"
     networks:
-      - docker_gwbridge
+      - cpos_test
     # volumes:
     #   - .:/cpos
     # ports:
@@ -43,17 +44,20 @@ services:
       #   published: 8888
       #   mode: host
     environment:
-      # - BEACON_IP=join.dca.fee.unicamp.br
-      - BEACON_IP=beacon
+      - BEACON_IP=join.dca.fee.unicamp.br
+      # - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
     command: /bin/bash demo/run_node.sh
 
 networks:
-  docker_gwbridge:
+  cpos_test:
   # host:
   #   name: host
-    name: docker_gwbridge
+    name: cpos_test
     # external: true
     # driver: host
     # attachable: true
+  host:
+    name: host
+    external: true
