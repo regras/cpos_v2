@@ -22,12 +22,18 @@ class Client:
 
         self.port = port
         self.id = id
+        self.ip = self._get_ip_address('eth0')
+
+    def _get_ip_address(self):
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        return s.getsockname()[0]
 
     def get_peerlist(self) -> Optional[list[Peer]]:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.logger.info(f"introducing self to beacon at {self.beacon_ip}:{self.beacon_port}")
 
-        msg = Hello(self.port, self.id)
+        msg = Hello(self.port, self.id, self.ip)
 
         try:
             self.socket.sendto(msg.serialize(), (self.beacon_ip, self.beacon_port))

@@ -76,6 +76,7 @@ class Beacon:
 
             self.logger.debug(f"handling message: {msg}")
             if isinstance(msg, Hello):
+                addr = msg.ip
                 peer = Peer(addr, msg.port, msg.id)
                 if peer not in self.peers:
                     self.peers.append(peer)
