@@ -22,7 +22,7 @@ class Client:
 
         self.port = port
         self.id = id
-        self.ip = self._get_ip_address('eth0')
+        self.ip = self._get_ip_address()
 
     def _get_ip_address(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
