@@ -3,7 +3,9 @@ from typing import Optional
 from cpos.p2p.peer import Peer
 from cpos.p2p.discovery.messages import Message, Hello, PeerList
 
+import fcntl
 import socket
+import struct
 import logging
 from threading import Thread
 
@@ -22,12 +24,13 @@ class Client:
 
         self.port = port
         self.id = id
-        self.ip = self._get_ip_address()
+        self.ip = self._get_ip_address("eth0")
 
-    def _get_ip_address(self):
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        s.connect(("8.8.8.8", 80))
-        return s.getsockname()[0]
+    def _get_ip_address(self, interface: str) -> str:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        packed_iface = struct.pack('256s', interface.encode('utf_8'))
+        packed_addr = fcntl.ioctl(sock.fileno(), 0x8915, packed_iface)[20:24]
+        return socket.inet_ntoa(packed_addr)
 
     def get_peerlist(self) -> Optional[list[Peer]]:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
