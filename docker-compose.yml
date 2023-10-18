@@ -30,7 +30,7 @@ services:
       replicas: 20
       # endpoint_mode: dnsrr
       placement:
-          max_replicas_per_node: 3
+          max_replicas_per_node: 1
           constraints:
             - node.role == worker
             # - node.labels.mynode == deterlab
