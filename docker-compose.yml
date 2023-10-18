@@ -76,7 +76,7 @@ networks:
     ipam:
       driver: default
       config:
-        - subnet: "10.60.30.0/24"
+        - subnet: "10.60.30.0/16"
 # test:
 #   name: test
 #   driver: overlay
