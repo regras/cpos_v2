@@ -27,10 +27,10 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 2
+      replicas: 20
       # endpoint_mode: dnsrr
       placement:
-          max_replicas_per_node: 1
+          max_replicas_per_node: 3
           constraints:
             - node.role == worker
             # - node.labels.mynode == deterlab
