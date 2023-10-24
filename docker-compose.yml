@@ -73,6 +73,7 @@ services:
 
 networks:
   test:
+    driver: overlay
     ipam:
       driver: default
       config:
