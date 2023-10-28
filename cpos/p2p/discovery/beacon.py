@@ -76,6 +76,7 @@ class Beacon:
 
             self.logger.debug(f"handling message: {msg}")
             if isinstance(msg, Hello):
+                addr = msg.ip
                 peer = Peer(addr, msg.port, msg.id)
                 if peer not in self.peers:
                     self.peers.append(peer)
@@ -110,6 +111,7 @@ class Beacon:
     def broadcast_random_peers(self, count: int = 5):
         self.logger.info("replying to peerlist requests")
         self.logger.debug(f"known peers: {self.peers}")
+        count = min(count, len(self.peers))
         for (addr, port) in self.reply_queue:
             random_peers = random.sample(self.peers, count)
             msg = PeerList(random_peers)
