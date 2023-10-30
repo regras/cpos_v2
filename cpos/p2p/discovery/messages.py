@@ -20,13 +20,14 @@ class Message:
         return pickle.loads(raw)
 
 class Hello(Message):
-    def __init__(self, port: int, id: bytes):
+    def __init__(self, port: int, id: bytes, ip: str):
         self.code = MessageCode.HELLO
         self.port = port
         self.id = id
+        self.ip = ip
     
     def __str__(self):
-        return f"SelfIntroduction: (port={self.port}, id={self.id.hex()[0:8]})"
+        return f"SelfIntroduction: (port={self.port}, id={self.id.hex()[0:8]}, ip={self.ip})"
 
 class PeerList(Message):
     def __init__(self, peerlist: list[Peer]):

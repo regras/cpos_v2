@@ -3,7 +3,9 @@ from typing import Optional
 from cpos.p2p.peer import Peer
 from cpos.p2p.discovery.messages import Message, Hello, PeerList
 
+import fcntl
 import socket
+import struct
 import logging
 from threading import Thread
 
@@ -22,12 +24,19 @@ class Client:
 
         self.port = port
         self.id = id
+        self.ip = self._get_ip_address("eth0")
+
+    def _get_ip_address(self, interface: str) -> str:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        packed_iface = struct.pack('256s', interface.encode('utf_8'))
+        packed_addr = fcntl.ioctl(sock.fileno(), 0x8915, packed_iface)[20:24]
+        return socket.inet_ntoa(packed_addr)
 
     def get_peerlist(self) -> Optional[list[Peer]]:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.logger.info(f"introducing self to beacon at {self.beacon_ip}:{self.beacon_port}")
 
-        msg = Hello(self.port, self.id)
+        msg = Hello(self.port, self.id, self.ip)
 
         try:
             self.socket.sendto(msg.serialize(), (self.beacon_ip, self.beacon_port))
