@@ -1,0 +1,21 @@
+services:
+  beacon:
+    # image: georgejuniorg/cpos_v2
+    build: .
+    tty: true
+    environment:
+      - PORT=9000
+    command: /bin/bash demo/run_beacon.sh
+  node:
+    # image: georgejuniorg/cpos_v2
+    build: .
+    tty: true
+    depends_on:
+      - beacon
+    deploy:
+      replicas: 1
+    environment:
+      - BEACON_IP=beacon
+      - BEACON_PORT=9000
+      - PORT=8888
+    command: /bin/bash demo/run_node.sh

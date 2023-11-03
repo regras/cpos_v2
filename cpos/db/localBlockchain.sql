@@ -1,0 +1,17 @@
+CREATE TABLE IF NOT EXISTS localChains (
+        idChain integer(100) NOT NULL,
+        id integer(100) NOT NULL,
+        round integer,
+        prev_hash text,
+        hash text NOT NULL,
+        node text,
+        mroot text,
+        tx text,
+        arrive_time text,
+        fork integer,
+        stable integer,
+        subuser integer,
+        proof_hash text,
+        numSuc integer,
+        round_stable integer default 0,
+        PRIMARY KEY (id,idChain))
