@@ -4,6 +4,7 @@ import hashlib
 import mysql.connector
 import numpy as np
 import os
+import signal
 
 from time import sleep
 
@@ -12,6 +13,12 @@ USER = "CPoS"
 PASSWORD = "CPoSPW"
 DATABASE = "mempool"
 INSERT_QUERY = "INSERT INTO transactions (transaction_id, value, input_address, output_address, committed, choosen, transaction_hash, data, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+PROGRAM_INTERRUPTED = False
+
+def sighandler(*args):
+    global PROGRAM_INTERRUPTED 
+    PROGRAM_INTERRUPTED = True
 
 class RandomTransactionGenerator:
     def __init__(self) -> None:
@@ -77,7 +84,7 @@ def populate_mempool() -> None:
 
         generator = RandomTransactionGenerator()
 
-        while True:
+        while not PROGRAM_INTERRUPTED:
             transaction = generator.generate_random_transactions()
             cursor = connection.cursor()
             cursor.execute(INSERT_QUERY, transaction)
