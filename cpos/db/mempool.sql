@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS transactions (
         input_address text NOT NULL,
         output_address text NOT NULL,
         committed integer default 0,
-        choosen integer default 0,
+        chosen integer default 0,
         transaction_hash text NOT NULL,
         data text NOT NULL,
         timestamp text NOT NULL,

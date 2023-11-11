@@ -23,7 +23,7 @@ HOST = "localhost"
 USER = "CPoS"
 PASSWORD = "CPoSPW"
 DATABASE = "mempool"
-RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY valuec DESC LIMIT 1"
+RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY value DESC LIMIT 1"
 PATCH_QUERY = "UPDATE transactions SET chosen = 1 WHERE transaction_id = %s"
 
 class MockTransactionList(TransactionList):

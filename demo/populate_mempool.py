@@ -12,7 +12,7 @@ HOST = "localhost"
 USER = "CPoS"
 PASSWORD = "CPoSPW"
 DATABASE = "mempool"
-INSERT_QUERY = "INSERT INTO transactions (transaction_id, value, input_address, output_address, committed, choosen, transaction_hash, data, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
+INSERT_QUERY = "INSERT INTO transactions (transaction_id, value, input_address, output_address, committed, chosen, transaction_hash, data, timestamp) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)"
 
 PROGRAM_INTERRUPTED = False
 
@@ -26,7 +26,7 @@ class RandomTransactionGenerator:
         self.input_address = self.generate_random_string(256)
         self.output_address = self.generate_random_string(256)
         self.committed = 0
-        self.choosen = 0
+        self.chosen = 0
 
     def generate_random_transactions(self) -> tuple:
         value = np.random.normal(100,20)
@@ -39,7 +39,7 @@ class RandomTransactionGenerator:
             str(self.input_address) +
             str(self.output_address) +
             str(self.committed) +
-            str(self.choosen) +
+            str(self.chosen) +
             str(data) +
             str(timestamp)
         )
@@ -50,7 +50,7 @@ class RandomTransactionGenerator:
             self.input_address,
             self.output_address,
             self.committed,
-            self.choosen,
+            self.chosen,
             transaction_hash,
             data,
             timestamp
