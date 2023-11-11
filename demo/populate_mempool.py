@@ -45,7 +45,7 @@ class RandomTransactionGenerator:
         )
 
         transaction = (
-            self.transaction_id,
+            transaction_hash,
             value,
             self.input_address,
             self.output_address,
