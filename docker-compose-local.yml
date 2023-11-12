@@ -3,6 +3,8 @@ services:
     # image: georgejuniorg/cpos_v2
     build: .
     tty: true
+    volumes:
+      - .:/cpos
     environment:
       - PORT=9000
     command: /bin/bash demo/run_beacon.sh
@@ -14,8 +16,11 @@ services:
       - beacon
     deploy:
       replicas: 1
+    volumes:
+      - .:/cpos
     environment:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - MOCK_TRANSACTIONS=false           # set to true to use randomly generated transactions
     command: /bin/bash demo/run_node.sh

@@ -5,6 +5,7 @@ import argparse
 import pickle
 import signal
 import threading
+import time
 
 from cpos.node import Node, NodeConfig
 from cpos.protocol.messages import Hello
@@ -40,6 +41,7 @@ def main():
 
     try:
         node.greet_peers()
+        time.sleep(5)
         node.start()
     except KeyboardInterrupt:
         exit(1)

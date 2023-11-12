@@ -63,4 +63,4 @@ class MockTransactionList(TransactionList):
 
     def get_hash(self) -> bytes:
         hash_bytes = bytes.fromhex(self.result[6])
-        return base64.b64encode(hash_bytes).decode('utf-8')
+        return base64.b64encode(hash_bytes)

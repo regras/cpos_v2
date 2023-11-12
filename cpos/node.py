@@ -8,7 +8,7 @@ import pickle
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cpos.core.block import Block, GenesisBlock
 from cpos.core.blockchain import BlockChain, BlockChainParameters
-from cpos.core.transactions import TransactionList
+from cpos.core.transactions import TransactionList, MockTransactionList
 from cpos.p2p.network import Network
 
 from cpos.protocol.messages import BlockBroadcast, Hello, Message, ResyncRequest, ResyncResponse
@@ -37,6 +37,11 @@ class State:
 class Node:
     def __init__(self, config: NodeConfig):
         self.config = config
+
+        use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "false")
+        use_mock_transactions = use_mock_transactions in ("true")
+
+        self.use_mock_transactions = use_mock_transactions
 
         if self.config.privkey is not None:
             self.privkey = Ed25519PrivateKey.from_private_bytes(self.config.privkey)
@@ -156,7 +161,11 @@ class Node:
         stake = self.bc.lookup_node_stake(self.id)
         candidate: Optional[Block] = None
         for i in range(0, stake):
-            tx = TransactionList()
+            if self.use_mock_transactions:
+                tx = MockTransactionList()
+            else:
+                tx = TransactionList()
+
             block = Block(parent_hash=self.bc.blocks[-1].hash,
                           transactions=tx,
                           owner_pubkey=self.pubkey.public_bytes_raw(),
