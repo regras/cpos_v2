@@ -45,6 +45,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - MOCK_TRANSACTIONS=false           # set to true to use randomly generated transactions
     command: /bin/bash demo/run_node.sh
 
 networks:
