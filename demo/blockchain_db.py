@@ -20,10 +20,6 @@ HOST = "localhost"
 USER = "CPoS"
 PASSWORD = "CPoSPW"
 DATABASE = "localBlockchain"
-INSERT_QUERY = "INSERT INTO localChains (idChain, id, round, prev_hash, hash, node, mroot, tx, arrive_time, fork, stable, subuser, proof_hash, numSuc, round_stable) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-SELECT_ALL_BLOCKS_QUERY = "SELECT * FROM localChains"
-CHECK_NON_EMPTY_TABLE_QUERY = "SELECT EXISTS (SELECT 1 FROM localChains)" # returns (1,) or (0,)
-SELECT_ALL_BLOCKS_ID = "SELECT id FROM localChains"
 PROGRAM_INTERRUPTED = False
 
 def sighandler(*args):
@@ -44,15 +40,6 @@ class BlockChain:
         for b in self.blocks:
             if b.hash == block.hash:
                 return True
-        return False
-    
-    def contains_in_db(self, block: Block):
-        cursor = self.connection.cursor()
-        cursor.execute(SELECT_ALL_BLOCKS_QUERY)
-        for blk in cursor:
-            if blk == block:
-                return True
-        cursor.close()
         return False
 
     def __init__(self, parameters: BlockChainParameters, genesis: Optional[GenesisBlock] = None):
@@ -100,14 +87,6 @@ class BlockChain:
         self.current_round: int = 0
         self.update_round()
 
-    def insert_block(self, block: Block, arrive_time: int):
-        # ($idChain$, $id$, $round$, $prev_hash$, $hash$, $node$, $mroot$, $tx$, $arrive_time$, fork, stable, subuser, proof_hash, numSuc, round_stable, VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        database_atributes = [10, 10, block.round, block.parent_hash, block.hash, block.owner_pubkey, "mroot", "tx", arrive_time, 0, 0, block.proof_hash, 0, 0]
-        cursor = self.connection.cursor()
-        cursor.execute(INSERT_QUERY, database_atributes)
-        self.connection.commit()
-        cursor.close()
-
     def update_round(self):
         current_time = time()
         genesis_time = self.genesis.timestamp
@@ -126,15 +105,20 @@ class BlockChain:
         # whether a fork has been detected
         # (this fork detection logic really, REALLY needs to be its own class)
 
+        
         # should only happen if the chain only has the genesis block
-        if self.last_confirmed_block == self.blocks[-1]:
+        if self.last_confirmed_block == self.blocks[-1]: # OLD
+            return
+        
+        if self.last_confirmed_block_id() == self.last_block_id():
             return
 
         # oldest unconfirmed block
-        oldest = self.blocks[self.last_confirmed_block.index + 1]
+        oldest = self.blocks[self.last_confirmed_block.index + 1] # OLD
+        oldest_index, oldest_id, oldest_numSuc, oldest_round = self.oldest_unconfirmed_block()
         delta_r = round - oldest.round
 
-        if delta_r > 0 and oldest.index > 0:
+        if delta_r > 0 and oldest.index > 0: # OLD
             successful_avg = self.unconfirmed_blocks[oldest] / delta_r
             self.logger.info(f"oldest unconfirmed block: {oldest}, delta_r: {delta_r}, s: {successful_avg}")
             # TODO: make the epsilon threshold variable
@@ -148,6 +132,21 @@ class BlockChain:
                 self.last_confirmed_block = self.blocks[oldest.index]
                 self.last_confirmation_delay = self.current_round - self.last_confirmed_block.round
                 self.unconfirmed_blocks.pop(oldest)
+
+        if delta_r > 0 and oldest_index > 0:
+            successful_avg = oldest_numSuc / delta_r
+            self.logger.info(f"oldest unconfirmed block: {oldest_id}, delta_r: {delta_r}, s: {successful_avg}")
+            # TODO: make the epsilon threshold variable
+            conf_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
+                                   tau=self.parameters.tau,
+                                   delta_r=delta_r,
+                                   threshold=1e-6)
+            self.logger.info(f"s_min: {conf_thresh}")
+            if successful_avg > conf_thresh:
+                self.logger.info(f"confirmed block {oldest_id}")
+                self.confirm_block(oldest_id)
+
+                self.last_confirmation_delay = self.current_round - oldest_round
 
             fork_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
                                    tau=self.parameters.tau,
@@ -197,12 +196,13 @@ class BlockChain:
 
     def set_genesis_block(self, genesis: GenesisBlock) -> bool:
         cursor = self.connection.cursor()
+        CHECK_NON_EMPTY_TABLE_QUERY = "SELECT EXISTS (SELECT 1 FROM localChains)" # returns (1,) or (0,)
         cursor.execute(CHECK_NON_EMPTY_TABLE_QUERY)
         for i in cursor:
             if (i==(1,)):
                 self.logger.error(f"refusing to insert new genesis block")
                 False
-        self.insert_block(genesis, 0) # CHECK ARRIVE TIME OF GENESIS BLOCK
+        self.insert_block(genesis, 0) # TODO CHECK ARRIVE TIME OF GENESIS BLOCK
         self.connection.commit()
         cursor.close()
 
@@ -212,23 +212,6 @@ class BlockChain:
 
         self.blocks.append(genesis) # OLD
         return True
-
-    def block_in_blockchain(self, block: Block):
-        FIND_BLOCK_QUERY = "SELECT * FROM tab2 WHERE hash = %s LIMIT 1"
-        cursor = self.connection.cursor()
-        cursor.execute(FIND_BLOCK_QUERY, [block.hash])
-        block_in_blockchain = False
-        for block in cursor:
-            block_in_blockchain = True
-        cursor.close()
-        return block_in_blockchain
-    
-    def number_of_blocks(self):
-        pass
-
-    def equal_parent_block(self, block: Block):
-        pass
-
     
     # try to insert a block at the end of the chain
     def insert(self, block: Block) -> bool:
@@ -265,14 +248,16 @@ class BlockChain:
             return False
         else:
             # update the successful sortition statistics
-            preceding_blocks = self.blocks[0 : block.index]
-            for b in preceding_blocks:
-                if b in self.unconfirmed_blocks:
-                    self.unconfirmed_blocks[b] += winning_tickets
+            preceding_blocks = self.blocks[0 : block.index] # OLD
+            for b in preceding_blocks: # OLD
+                if b in self.unconfirmed_blocks: # OLD
+                    self.unconfirmed_blocks[b] += winning_tickets # OLD
+            self.update_successfull_sortition(block.index, winning_tickets)
+            
 
         # in case there is already a block present at block.index
         if self.number_of_blocks() > block.index:
-            if block.proof_hash <= self.blocks[block.index].proof_hash:
+            if block.proof_hash <= self.get_proof_hash_of_block(block.index):
                 self._log_failed_insertion(block, "smaller proof_hash")
                 return False
 
@@ -283,17 +268,23 @@ class BlockChain:
 
         # reject block if it was added in the same round as the parent
         parent_idx = block.index - 1
-        if block.round <= self.blocks[parent_idx].round:
+        if block.round <= self.blocks[parent_idx].round: # OLD
+            self._log_failed_insertion(block, "same round as parent")
+            return False
+        
+        if block.round <= self.get_round_of_block(parent_idx):
             self._log_failed_insertion(block, "same round as parent")
             return False
 
         # self.logger.info(f"s: {self.unconfirmed_blocks}")
         self.logger.info(f"inserting {block}") 
-        self.blocks[block.index : ] = []
-        self.unconfirmed_blocks[block] = 0
-        if block.index <= self.last_confirmed_block.index:
+        self.blocks[block.index : ] = [] # OLD
+        self.delete_blocks_from(block.index)
+        self.unconfirmed_blocks[block] = 0 # OLD NOT REPLACED
+        if block.index <= self.last_confirmed_block.index: # OLD
             self.last_confirmed_block = self.blocks[block.index - 1]
-        self.blocks.append(block)
+        self.blocks.append(block) # OLD
+        self.insert_block(block, time()) # TODO CHECK ARRIVAL TIME
 
         return True
 
@@ -303,7 +294,7 @@ class BlockChain:
         self.logger.info(f"starting merge process with fork: {foreign_blocks}")
         idx = None
         first_foreign_block = foreign_blocks[0]
-        for i, block in enumerate(self.blocks):
+        for i, block in enumerate(self.blocks): # OLD
             # ignore genesis block
             if block.hash == 0:
                 continue
@@ -312,20 +303,31 @@ class BlockChain:
                 idx = i
                 break
 
-        if idx is None:
+        id, idx_db = self.block_of_hash(first_foreign_block.parent_hash)
+
+        if idx is None: # OLD
+            self.logger.error(f"foreign subchain has no common ancestor with local chain")
+            return False
+        
+        if idx_db is None:
             self.logger.error(f"foreign subchain has no common ancestor with local chain")
             return False
 
 
-        self.logger.info(f"found common ancestor: {self.blocks[idx]}")
+        self.logger.info(f"found common ancestor: {self.blocks[idx]}") # OLD
+        self.logger.info(f"found common ancestor: {id}")
         # temporarily remove local fork from the chain
-        original_local_subchain = self.blocks[idx + 1 : ]
-        self.blocks[idx + 1 : ] = []
+        # TODO from this point this function seems very optimizable
+        original_local_subchain = self.blocks[idx + 1 : ] # OLD
+        self.blocks[idx + 1 : ] = [] # OLD
+        original_local_subchain_db = self.blocks_from_index(idx + 1)
+        self.delete_blocks_from(idx+1)
 
         # try inserting the head of the fork
         if not self.insert(foreign_blocks.pop(0)):
             self.logger.info(f"merge failed: foreign chain is worse than local chain")
-            self.blocks += original_local_subchain
+            self.blocks += original_local_subchain # OLD
+            self.reintroduce_blocks(original_local_subchain_db)
             return False
         # if successful, try inserting all following blocks
         else:
@@ -337,10 +339,151 @@ class BlockChain:
 
     def _dump_state(self):
         cursor = self.connection.cursor()
-        cursor.execute(SELECT_ALL_BLOCKS_QUERY)
+        cursor.execute("SELECT * FROM localChains")
         for block in self.blocks: # OLD
             print(block) # OLD
         for block in cursor:
             print(block)
         self.connection.commit()
         cursor.close()
+
+    def insert_block(self, block: Block, arrive_time: int):
+        # ($indx$, $id$, $round$, $prev_hash$, $hash$, $node$, $mroot$, $tx$, $arrive_time$, fork, stable, subuser, $proof_hash$, numSuc, round_stable, VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        database_atributes = [block.index, block.hash, block.round, block.parent_hash, block.hash, block.owner_pubkey, "mroot", "tx", arrive_time, 0, 0, block.proof_hash, 0, 0] # TODO hash as id?
+        cursor = self.connection.cursor()
+        INSERT_QUERY = "INSERT INTO localChains (indx, id, round, prev_hash, hash, node, mroot, tx, arrive_time, fork, stable, subuser, proof_hash, numSuc, round_stable) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        cursor.execute(INSERT_QUERY, database_atributes)
+        self.connection.commit()
+        cursor.close()
+    
+    def block_in_blockchain(self, block: Block):
+        FIND_BLOCK_QUERY = "SELECT * FROM tab2 WHERE hash = %s LIMIT 1"
+        cursor = self.connection.cursor()
+        cursor.execute(FIND_BLOCK_QUERY, [block.hash])
+        block_in_blockchain = False
+        for block in cursor:
+            block_in_blockchain = True
+        cursor.close()
+        return block_in_blockchain
+    
+    def number_of_blocks(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT COUNT(*) FROM localChains")
+        for i in cursor:
+            count = i[0]
+        cursor.close()
+        return count
+
+    def equal_parent_block(self, block: Block):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT hash FROM localChains WHERE indx = {block.index - 1}")
+        for i in cursor:
+            hash = i
+        cursor.close()
+        return hash == block.parent_hash
+
+    def delete_blocks_from(self, index: int):
+        cursor = self.connection.cursor()
+        cursor.execute(f"DELETE FROM localChains WHERE indx >= {index}")
+        self.connection.commit()
+        cursor.close()
+
+    def last_confirmed_block_id(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT id FROM localChains WHERE stable = 1 ORDER BY indx DESC LIMIT 1")
+        for i in cursor:
+            id = i
+        cursor.close()
+        return id
+    
+    def last_block_id(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT id FROM localChains ORDER BY indx DESC LIMIT 1")
+        for i in cursor:
+            id = i
+        cursor.close()
+        return id
+    
+    def oldest_unconfirmed_block(self):
+        cursor = self.connection.cursor()
+        cursor.execute("SELECT indx, id, numSuc, round, FROM localChains WHERE stable = 0 ORDER BY round ASC LIMIT 1")
+        for i in cursor:
+            indx, id, numSuc, round = i
+        cursor.close()
+        return indx, id, numSuc, round
+    
+    def confirm_block(self, id: int):
+        cursor = self.connection.cursor()
+        cursor.execute(f"UPDATE localChains SET stable = 1 WHERE id = {id}")
+        self.connection.commit()
+        cursor.close()
+
+    def update_successfull_sortition(self, indx, winning_tickets):
+        cursor = self.connection.cursor()
+        cursor.execute(f"UPDATE localChains SET numSuc = numSuc + {winning_tickets} WHERE indx < {indx} AND stable = 0")
+        self.connection.commit()
+        cursor.close()
+
+    def get_proof_hash_of_block(self, index):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT proof_hash FROM localChains WHERE indx = {index}")
+        for i in cursor:
+            proof_hash = i
+        cursor.close()
+        return proof_hash
+    
+    def get_round_of_block(self, index):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT round FROM localChains WHERE indx = {index}")
+        for i in cursor:
+            proof_hash = i
+        cursor.close()
+        return proof_hash
+    
+    def contains_in_db(self, block: Block): # TODO hash as id?
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT hash FROM localChains")
+        for hash in cursor:
+            if hash == block.hash:
+                cursor.close()
+                return True
+        cursor.close()
+        return False
+    
+    def block_of_hash(self, hash):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT id, indx, FROM localChains WHERE hash = {hash} ORDER BY indx ASC LIMIT 1")
+        for i in cursor:
+            id, indx = i
+        cursor.close()
+        return id, indx
+    
+    def block_of_hash(self, hash):
+        cursor = self.connection.cursor()
+        cursor.execute(f"SELECT id, indx, FROM localChains WHERE hash = {hash} ORDER BY indx ASC LIMIT 1")
+        for i in cursor:
+            id, indx = i
+        cursor.close()
+        return id, indx
+    
+    def blocks_from_index(self, index):
+        cursor = self.connection.cursor()
+        blocks_info = []
+        cursor.execute(f"SELECT * FROM localChains WHERE indx >= {index} ORDER BY indx")
+        for i in cursor:
+            blocks_info.append(i)
+        cursor.close()
+        return blocks_info
+    
+    def reintroduce_blocks(self, list_of_blocks_data):
+        # ($indx$, $id$, $round$, $prev_hash$, $hash$, $node$, $mroot$, $tx$, $arrive_time$, fork, stable, subuser, $proof_hash$, numSuc, round_stable, VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        cursor = self.connection.cursor()
+        for block_data in list_of_blocks_data:
+            INSERT_QUERY = "INSERT INTO localChains (indx, id, round, prev_hash, hash, node, mroot, tx, arrive_time, fork, stable, subuser, proof_hash, numSuc, round_stable) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+            cursor.execute(INSERT_QUERY, block_data)
+        self.connection.commit()
+        cursor.close()
+
+
+
+# fixing index issue on update round and going to insert

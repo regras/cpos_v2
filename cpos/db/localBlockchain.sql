@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS localChains (
-        idChain integer(100) NOT NULL,
+        indx integer(100) NOT NULL,
         id integer(100) NOT NULL,
         round integer,
         prev_hash text,
@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS localChains (
         proof_hash text,
         numSuc integer,
         round_stable integer default 0,
-        PRIMARY KEY (id,idChain))
+        PRIMARY KEY (id,indx))
