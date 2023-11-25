@@ -31,7 +31,7 @@ class RandomTransactionGenerator:
     def generate_random_transactions(self) -> tuple:
         value = np.random.normal(100,20)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        data = self.generate_random_string(int(np.random.normal(100, 20)))
+        data = self.generate_random_string(int(np.random.normal(800, 200)))
 
         transaction_hash = self.generate_hash(
             str(self.transaction_id) +
@@ -66,8 +66,10 @@ class RandomTransactionGenerator:
         return sha.hexdigest()
     
     def generate_random_string(self, length:int) -> str:
-        random_bytes = os.urandom(length)
-        random_string = hashlib.sha256(random_bytes).hexdigest()
+        random_string = ""
+        while len(random_string) < length:
+            random_bytes = os.urandom(32)
+            random_string += hashlib.sha256(random_bytes).hexdigest()
         return random_string[:length]
 
 def populate_mempool() -> None:
@@ -90,7 +92,6 @@ def populate_mempool() -> None:
             cursor.execute(INSERT_QUERY, transaction)
             connection.commit()
             cursor.close()
-            sleep(0.01)
 
     except mysql.connector.Error as err:
         print(f"Error: {err}")

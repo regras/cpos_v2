@@ -2,6 +2,7 @@ from __future__ import annotations
 import base64
 import mysql.connector
 import pickle
+import sys
 
 class TransactionList:
     def __init__(self):
@@ -25,6 +26,7 @@ PASSWORD = "CPoSPW"
 DATABASE = "mempool"
 RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY value DESC LIMIT 1"
 PATCH_QUERY = "UPDATE transactions SET chosen = 1 WHERE transaction_id = %s"
+BLOCK_SIZE = 199000     # 200kb - ~1kB of header
 
 class MockTransactionList(TransactionList):
     def __init__(self):
@@ -36,12 +38,22 @@ class MockTransactionList(TransactionList):
                 database=DATABASE
             )
             cursor = connection.cursor()
-            cursor.execute(RETRIEVE_QUERY)
-            self.result = cursor.fetchone()
 
-            if self.result:
-                cursor.execute(PATCH_QUERY, (self.result[0],))
-                connection.commit()
+            self.transactions = []
+            totalSize = 0
+
+            while totalSize < BLOCK_SIZE:
+                cursor.execute(RETRIEVE_QUERY)
+                result = cursor.fetchone()
+                totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
+                if totalSize > BLOCK_SIZE:
+                    break
+
+                self.transactions.append(result)
+
+                if result:
+                    cursor.execute(PATCH_QUERY, (result[0],))
+                    connection.commit()
 
             cursor.close()
 
@@ -61,6 +73,10 @@ class MockTransactionList(TransactionList):
     def deserialize(cls, raw: bytes) -> TransactionList:
         return pickle.loads(raw)
 
+    #TODO: get hash of all transactions (probably using Merkle tree)
     def get_hash(self) -> bytes:
-        hash_bytes = bytes.fromhex(self.result[6])
-        return base64.b64encode(hash_bytes)
+        if self.transactions:
+            hash_bytes = bytes.fromhex(self.transactions[0][6])
+            return base64.b64encode(hash_bytes)
+        else:
+            return b"\x00"

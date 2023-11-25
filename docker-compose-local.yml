@@ -15,7 +15,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 1
+      replicas: 10
     volumes:
       - .:/cpos
     environment:
