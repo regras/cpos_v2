@@ -16,6 +16,7 @@ jsonpickle = "^3.0.1"
 matplotlib = "^3.7.1"
 graphviz = "^0.20.1"
 mysql-connector-python = "^8.2.0"
+scp = "^0.14.5"
 
 
 [tool.poetry.group.dev.dependencies]

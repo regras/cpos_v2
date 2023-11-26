@@ -23,4 +23,10 @@ services:
       - BEACON_PORT=9000
       - PORT=8888
       - MOCK_TRANSACTIONS=false           # set to true to use randomly generated transactions
+
+      # Be careful not to commit the following information to github
+      - SSH_ADDRESS=
+      - SSH_PASSWORD=
+      - SCP_PATH=
+
     command: /bin/bash demo/run_node.sh
