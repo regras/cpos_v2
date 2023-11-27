@@ -13,7 +13,7 @@ def createSSHClient(hostname, user, password, port=22):
 ssh_address = os.environ.get("SSH_ADDRESS", "")
 ssh_password = os.environ.get("SSH_PASSWORD", "")
 scp_filepath = os.environ.get("SCP_PATH", "")
-local_filepath = "./demo/logs"
+local_filepath = "./demo/logs/"
 
 if ssh_address and ssh_password and scp_filepath:
     ssh_user, ssh_hostname = ssh_address.split("@")
