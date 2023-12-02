@@ -45,6 +45,10 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - ROUND_TIME=5
+      - TOLERANCE=2
+      - TAU=10
+      - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=false           # set to true to use randomly generated transactions
       
       # Be careful not to commit the following information to github

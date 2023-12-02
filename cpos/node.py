@@ -77,7 +77,12 @@ class Node:
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
         # params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
-        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
+        round_time = float(os.getenv("ROUND_TIME", 5))
+        tolerance = int(os.getenv("TOLERANCE", 2))
+        tau = int(os.getenv("TAU", 10))
+        total_stake = int(os.getenv("TOTAL_STAKE", 25))
+
+        params = BlockChainParameters(round_time=round_time, tolerance=tolerance, tau=tau, total_stake=total_stake)
         self.bc: BlockChain = BlockChain(params, genesis=genesis)
         self.state = State.LISTENING
         self.missed_blocks: list[Block] = []
