@@ -15,13 +15,20 @@ ssh_password = os.environ.get("SSH_PASSWORD", "")
 scp_filepath = os.environ.get("SCP_PATH", "")
 local_filepath = "./demo/logs/"
 
-if ssh_address and ssh_password and scp_filepath:
-    ssh_user, ssh_hostname = ssh_address.split("@")
-    ssh = createSSHClient(ssh_hostname, ssh_user, ssh_password)
-    scp = SCPClient(ssh.get_transport())
-    scp.put(files=local_filepath, remote_path=scp_filepath, recursive=True)
+def send_data():
 
-    print("Finished copying log files!")
+    if ssh_address and ssh_password and scp_filepath:
+        print(f"Sending log files to {ssh_address} at {scp_filepath}")
 
-else:
-    print("Couldn't send data! SSH address and/or password and/or scp path not specified.")
+        ssh_user, ssh_hostname = ssh_address.split("@")
+        ssh = createSSHClient(ssh_hostname, ssh_user, ssh_password)
+        scp = SCPClient(ssh.get_transport())
+        scp.put(files=local_filepath, remote_path=scp_filepath, recursive=True)
+
+        print("Finished copying log files!")
+
+    else:
+        print("Couldn't send data! SSH address and/or password and/or scp path not specified.")
+
+if __name__ == "__main__":
+    send_data()
