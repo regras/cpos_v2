@@ -10,6 +10,7 @@ import time
 from cpos.node import Node, NodeConfig
 from cpos.protocol.messages import Hello
 from demo.populate_mempool import populate_mempool
+from demo.send_data import send_data
 
 def main():
     parser = argparse.ArgumentParser()
@@ -43,6 +44,7 @@ def main():
         node.greet_peers()
         time.sleep(5)
         node.start()
+        send_data()
     except KeyboardInterrupt:
         exit(1)
 
