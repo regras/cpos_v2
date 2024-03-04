@@ -1,17 +1,19 @@
 CREATE TABLE IF NOT EXISTS localChains (
-        indx integer(100) NOT NULL,
+        block_index integer(100) NOT NULL,
         id varchar(255) NOT NULL,
         round integer,
-        prev_hash varchar(255),
+        parent_hash varchar(255),
         hash varchar(255) NOT NULL,
         owner_pubkey varchar(255),
+        signed_node_hash varchar(255),
         merkle_root varchar(255),
+        ticket_number integer(100),
         transactions longtext,
         arrive_time integer,
         fork integer,
-        stable integer,
+        confirmed integer,
         subuser integer,
         proof_hash varchar(255),
         numSuc integer,
         round_stable integer default 0,
-        PRIMARY KEY (id,indx))
+        PRIMARY KEY (id,block_index))

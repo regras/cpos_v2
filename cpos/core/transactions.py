@@ -5,8 +5,9 @@ import pickle
 import sys
 
 class TransactionList:
-    def __init__(self):
+    def __init__(self, fill_transactions: bool):
         self.data = b""
+        self.transactions = str([])
         pass
     def serialize(self) -> bytes:
         pass
@@ -15,6 +16,8 @@ class TransactionList:
         pass
     def get_hash(self) -> bytes:
         return b"\x00"
+    def set_transactions(self, transactions: str):
+        self.transactions = transactions
 
 # generating random bytes: https://bobbyhadz.com/blog/python-generate-random-bytes
 # encoding binary data with base64: https://stackabuse.com/encoding-and-decoding-base64-strings-in-python/
@@ -29,7 +32,7 @@ PATCH_QUERY = "UPDATE transactions SET chosen = 1 WHERE transaction_id = %s"
 BLOCK_SIZE = 199000     # 200kb - ~1kB of header
 
 class MockTransactionList(TransactionList):
-    def __init__(self):
+    def __init__(self, fill_transactions: bool):
         try:
             connection = mysql.connector.connect(
                 host=HOST,
@@ -37,25 +40,26 @@ class MockTransactionList(TransactionList):
                 password=PASSWORD,
                 database=DATABASE
             )
-            cursor = connection.cursor()
+            self.transaction_list = []
+            if fill_transactions:
+                cursor = connection.cursor()
+                totalSize = 0
 
-            self.transactions = []
-            totalSize = 0
+                while totalSize < BLOCK_SIZE:
+                    cursor.execute(RETRIEVE_QUERY)
+                    result = cursor.fetchone()
+                    totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
+                    if totalSize > BLOCK_SIZE:
+                        break
 
-            while totalSize < BLOCK_SIZE:
-                cursor.execute(RETRIEVE_QUERY)
-                result = cursor.fetchone()
-                totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
-                if totalSize > BLOCK_SIZE:
-                    break
+                    self.transaction_list.append(result)
 
-                self.transactions.append(result)
+                    if result:
+                        cursor.execute(PATCH_QUERY, (result[0],))
+                        connection.commit()
 
-                if result:
-                    cursor.execute(PATCH_QUERY, (result[0],))
-                    connection.commit()
-
-            cursor.close()
+                cursor.close()
+            self.transactions = str(self.transaction_list)
 
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -72,11 +76,17 @@ class MockTransactionList(TransactionList):
     @classmethod
     def deserialize(cls, raw: bytes) -> TransactionList:
         return pickle.loads(raw)
+    
+    def set_transactions(self, transactions: str):
+        self.transactions = transactions
 
     #TODO: get hash of all transactions (probably using Merkle tree)
     def get_hash(self) -> bytes:
+        return b"\x00" # TODO Provisory, code below does not work
         if self.transactions:
-            hash_bytes = bytes.fromhex(self.transactions[0][6])
+            hash_bytes = bytes.fromhex(self.transactions) 
             return base64.b64encode(hash_bytes)
         else:
             return b"\x00"
+    
+    

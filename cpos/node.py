@@ -38,7 +38,7 @@ class Node:
     def __init__(self, config: NodeConfig):
         self.config = config
 
-        use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "false")
+        use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "true")
         use_mock_transactions = use_mock_transactions in ("true")
 
         self.use_mock_transactions = use_mock_transactions
@@ -77,12 +77,7 @@ class Node:
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
         # params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
-        round_time = float(os.getenv("ROUND_TIME", 5))
-        tolerance = int(os.getenv("TOLERANCE", 2))
-        tau = int(os.getenv("TAU", 10))
-        total_stake = int(os.getenv("TOTAL_STAKE", 25))
-
-        params = BlockChainParameters(round_time=round_time, tolerance=tolerance, tau=tau, total_stake=total_stake)
+        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
         self.bc: BlockChain = BlockChain(params, genesis=genesis)
         self.state = State.LISTENING
         self.missed_blocks: list[Block] = []
@@ -96,7 +91,7 @@ class Node:
     def dump_data(self, log_dir: str):
         cwd = os.getcwd()
         filepath = os.path.join(cwd, log_dir, f"node_{self.id.hex()[0:8]}.data")
-        self.logger.warning(f"Dumping data to {filepath}...");
+        self.logger.warning(f"Dumping data to {filepath}...")
         try:
             with open(filepath, "wb") as file:
                 data = pickle.dumps((self.bc, self.message_count, self.total_message_bytes))
@@ -167,16 +162,16 @@ class Node:
         candidate: Optional[Block] = None
         for i in range(0, stake):
             if self.use_mock_transactions:
-                tx = MockTransactionList()
+                tx = MockTransactionList(fill_transactions=True)
             else:
-                tx = TransactionList()
+                tx = TransactionList(fill_transactions=True)
 
-            block = Block(parent_hash=self.bc.blocks[-1].hash,
-                          transactions=tx,
+            block = Block(parent_hash=self.bc.get_last_block_hash(),
+                          transactionlist=tx,
                           owner_pubkey=self.pubkey.public_bytes_raw(),
                           signed_node_hash=b"",
                           round=self.bc.current_round,
-                          index=len(self.bc.blocks),
+                          index=self.bc.number_of_blocks(),
                           ticket_number=i)
             self.sign_block(block)
             block.ticket_number = i
@@ -254,8 +249,8 @@ class Node:
                 if isinstance(msg, ResyncRequest):
                     peer_id = msg.peer_id
                     # make sure we only send stuff after the genesis block
-                    count = max(msg.block_count, len(self.bc.blocks) - 1)
-                    block_list = self.bc.blocks[-1 * count : ]
+                    count = max(msg.block_count, self.bc.number_of_blocks() - 1)
+                    block_list = self.bc.last_n_blocks(count)
                     self.send_message(peer_id, ResyncResponse(block_list))
 
             if self.state == State.RESYNCING:
@@ -267,9 +262,10 @@ class Node:
                 if isinstance(msg, ResyncRequest):
                     peer_id = msg.peer_id
                     # make sure we only send stuff after the genesis block
-                    count = max(msg.block_count, len(self.bc.blocks) - 1)
-                    block_list = self.bc.blocks[-1 * count : ]
+                    count = max(msg.block_count, self.bc.number_of_blocks() - 1)
+                    block_list = self.bc.last_n_blocks(count) 
                     self.send_message(peer_id, ResyncResponse(block_list))
+
 
     def start(self):
         self.should_halt = False
@@ -283,5 +279,3 @@ class Node:
 
     def __str__(self):
         return f"Node(id={self.id.hex()[0:8]})"
-
-
