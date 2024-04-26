@@ -225,7 +225,7 @@ class Node:
                 request_index = -1
                 self.send_message(missed[1], ResyncRequest(self.id, request_index))
                 self.state = State.RESYNCING
-                self.logger.debug("started resyncing")
+                self.logger.info("started resyncing")
 
             self.bc.update_round()
             # on round change:
@@ -285,7 +285,7 @@ class Node:
                         self.received_resync_blocks = []
                         self.bc.fork_detected = False
                         self.missed_blocks = []
-                        self.logger.debug("resync completed!")
+                        self.logger.info("resync completed!")
 
                     # If it is needed to request for more blocks
                     else:

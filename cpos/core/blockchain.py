@@ -103,7 +103,7 @@ class BlockChain:
 
             if successful_avg < fork_thresh:
                 self.fork_detected = True
-                self.logger.debug(f"fork detected!")
+                self.logger.info(f"fork detected!")
 
     def _log_failed_verification(self, block: Block, reason: str):
         self.logger.debug(f"failed to verify block {block.hash.hex()} ({reason})")
