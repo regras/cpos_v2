@@ -12,7 +12,7 @@ mysql -e "CREATE DATABASE localBlockchain;"
 mysql localBlockchain < cpos/db/localBlockchain.sql
 
 # CPoS related commands
-export GENESIS_TIMESTAMP=$(date +%s)
+export GENESIS_TIMESTAMP=$(date -d '2024-01-01 00:00:00' +%s)
 echo "GENESIS_TIMESTAMP: $GENESIS_TIMESTAMP"
 poetry run python demo/main.py --beacon-ip $BEACON_IP --beacon-port $BEACON_PORT -p $PORT --genesis-timestamp $GENESIS_TIMESTAMP --total-rounds 30 &
 pid=$!

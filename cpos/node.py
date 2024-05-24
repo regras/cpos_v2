@@ -97,7 +97,7 @@ class Node:
     def dump_data(self, log_dir: str):
         cwd = os.getcwd()
         filepath = os.path.join(cwd, log_dir, f"node_{self.id.hex()[0:8]}.data")
-        self.logger.warning(f"Dumping data to {filepath}...");
+        self.logger.warning(f"Dumping data to {filepath}...")
         try:
             with open(filepath, "wb") as file:
                 data = pickle.dumps((self.bc, self.message_count, self.total_message_bytes))
@@ -209,8 +209,9 @@ class Node:
 
     def loop(self):
         round = self.bc.genesis.timestamp
+        initial_round = self.bc.current_round
         while True:
-            if self.config.total_rounds is not None and self.bc.current_round >= self.config.total_rounds:
+            if self.config.total_rounds is not None and self.bc.current_round >= initial_round + self.config.total_rounds:
                 self.should_halt = True
 
             if self.should_halt:

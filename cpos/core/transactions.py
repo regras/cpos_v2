@@ -24,8 +24,9 @@ HOST = "localhost"
 USER = "CPoS"
 PASSWORD = "CPoSPW"
 DATABASE = "mempool"
-RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY value DESC LIMIT 1"
-PATCH_QUERY = "UPDATE transactions SET chosen = 1 WHERE transaction_id = %s"
+# This retrieve query has a limit of 200 for memory safety purposes. You can change if you want.
+# This number was chosen considering we had at most 110 transactions during our tests for theses parameters.
+RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY value DESC LIMIT 200"
 BLOCK_SIZE = 199000     # 200kb - ~1kB of header
 
 class MockTransactionList(TransactionList):
@@ -37,23 +38,26 @@ class MockTransactionList(TransactionList):
                 password=PASSWORD,
                 database=DATABASE
             )
-            cursor = connection.cursor()
+            cursor = connection.cursor(dictionary=True, buffered=True)
+            cursor.execute(RETRIEVE_QUERY)
 
             self.transactions = []
+            transaction_ids = []
             totalSize = 0
 
-            while totalSize < BLOCK_SIZE:
-                cursor.execute(RETRIEVE_QUERY)
-                result = cursor.fetchone()
-                totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
+            result_set = cursor.fetchall()
+
+            for row in result_set:
+                totalSize += sum([sys.getsizeof(row[tuplePosition]) for tuplePosition in row.keys()])
                 if totalSize > BLOCK_SIZE:
                     break
+                self.transactions.append(row)
+                transaction_ids.append(row['transaction_id'])
 
-                self.transactions.append(result)
-
-                if result:
-                    cursor.execute(PATCH_QUERY, (result[0],))
-                    connection.commit()
+            format_strings = ','.join(['%s'] * len(transaction_ids))
+            PATCH_QUERY = f"UPDATE transactions SET chosen = 1 WHERE transaction_id IN ({format_strings})"
+            cursor.execute(PATCH_QUERY, transaction_ids)
+            connection.commit()
 
             cursor.close()
 
@@ -76,7 +80,7 @@ class MockTransactionList(TransactionList):
     #TODO: get hash of all transactions (probably using Merkle tree)
     def get_hash(self) -> bytes:
         if self.transactions:
-            hash_bytes = bytes.fromhex(self.transactions[0][6])
+            hash_bytes = bytes.fromhex(self.transactions[0]["transaction_hash"])
             return base64.b64encode(hash_bytes)
         else:
             return b"\x00"
