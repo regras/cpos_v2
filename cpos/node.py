@@ -200,9 +200,13 @@ class Node:
         if block.round not in range(round, round + tolerance + 1):
             self.logger.info(f"discarding block {block.hash.hex()[0:8]} (outside of tolerance range)")
             return False
+        if block.owner_pubkey == self.pubkey.public_bytes_raw():
+            self.logger.info(f"discarding block {block.hash.hex()[0:8]} (produced by itself)")
+            return False
         self.logger.info(f"trying to insert {block}")
         if not self.bc.insert(block):
-            self.missed_blocks.append((block, peer_id))
+            if block not in self.bc:
+                self.missed_blocks.append((block, peer_id))
         else:
             own_id = self.id if not None else self.config.id
             self.broadcast_message(BlockBroadcast(block, own_id))

@@ -72,7 +72,7 @@ def fork_threshold(total_stake: int, tau: int, delta_r: int, threshold: float = 
     while True:
         k = min((tau + a) * delta_r - 1, total_stake)
         chance = cumulative_binom_dist(total_stake, k, p)
-        print(f"chance: {chance}")
+        # print(f"chance: {chance}")
         
         if chance >= threshold:
             break

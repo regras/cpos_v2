@@ -96,7 +96,6 @@ class BlockChain:
                 self.last_confirmation_delay = self.current_round - self.last_confirmed_block.round
                 self.unconfirmed_blocks.pop(oldest)
 
-            #TODO: Is it really fork_threshold or confirmation_threshold???
             fork_thresh = fork_threshold(total_stake=self.parameters.total_stake,
                                    tau=self.parameters.tau,
                                    delta_r=delta_r,
