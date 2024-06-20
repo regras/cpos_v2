@@ -44,7 +44,7 @@ class MockTransactionList(TransactionList):
             cursor = connection.cursor(dictionary=True, buffered=True)
             cursor.execute(RETRIEVE_QUERY)
 
-            self.transactions = []
+            self.transactions_list = []
             transaction_ids = []
             totalSize = 0
 
@@ -54,7 +54,7 @@ class MockTransactionList(TransactionList):
                 totalSize += sum([sys.getsizeof(row[tuplePosition]) for tuplePosition in row.keys()])
                 if totalSize > BLOCK_SIZE:
                     break
-                self.transactions.append(row)
+                self.transactions_list.append(row)
                 transaction_ids.append(row['transaction_id'])
 
             format_strings = ','.join(['%s'] * len(transaction_ids))
@@ -63,6 +63,8 @@ class MockTransactionList(TransactionList):
             connection.commit()
 
             cursor.close()
+
+            self.transactions = str(self.transactions_list)
 
         except mysql.connector.Error as err:
             print(f"Error: {err}")
