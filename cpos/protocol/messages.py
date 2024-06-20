@@ -13,6 +13,7 @@ class MessageCode:
     BLOCK_BROADCAST = 0x2
     PEER_LIST_REQUEST = 0x3
     PEER_LIST = 0x4
+    PEER_FORGET_REQUEST = 0x5
 
 class MessageParseError(Exception):
     pass
@@ -56,6 +57,11 @@ class PeerListRequest(Message):
     def __init__(self, node_id: bytes):
         self.code = MessageCode.PEER_LIST_REQUEST
         self.node_id = node_id
+
+class PeerForgetRequest(Message):
+    def __init__(self, peer_id: bytes):
+        self.peer_id = peer_id
+        self.code = MessageCode.PEER_FORGET_REQUEST
 
 class PeerList(Message):
     def __init__(self, peerlist: list[tuple[str, str | int, bytes]]):

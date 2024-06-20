@@ -4,6 +4,7 @@ import logging
 import random
 import os
 import pickle
+import random 
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
 from cpos.core.block import Block, GenesisBlock
@@ -11,10 +12,12 @@ from cpos.core.blockchain import BlockChain, BlockChainParameters
 from cpos.core.transactions import TransactionList, MockTransactionList
 from cpos.p2p.network import Network
 
-from cpos.protocol.messages import BlockBroadcast, Hello, Message, ResyncRequest, ResyncResponse
+from cpos.protocol.messages import BlockBroadcast, Hello, Message, ResyncRequest, ResyncResponse, PeerForgetRequest
 
-from cpos.p2p.discovery.client import Client as DiscoveryClient
 from cpos.p2p.peer import Peer
+
+MINIMUM_N_PEERS = 3
+MAXIMUM_N_PEERS = 5
 
 class NodeConfig:
     def __init__(self, **kwargs):
@@ -62,8 +65,6 @@ class Node:
         logger.addHandler(handler)
         self.logger = logger
 
-        self._contact_beacon()
-
         self._init_network()
 
         # this is an improvised hack for demo purposes, here we should
@@ -77,7 +78,7 @@ class Node:
         # TODO: we need to be able to, at runtinme:
         # - request the blockchain parameters from other nodes
         # params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
-        params = BlockChainParameters(round_time=5, tolerance=2, tau=10, total_stake=25)
+        params = BlockChainParameters(round_time=16, tolerance=2, tau=10, total_stake=25) # has to be the same round time as beacon
         self.bc: BlockChain = BlockChain(params, genesis=genesis)
         self.state = State.LISTENING
         self.missed_blocks: list[Block] = []
@@ -101,25 +102,10 @@ class Node:
         except Exception as e:
             self.logger.error(f"Failed to dump data: {e}")
 
-    # TODO: this should probably be moved into the cpos.p2p.network
-    def _contact_beacon(self):
-        beacon_ip = self.config.beacon_ip
-        beacon_port = self.config.beacon_port
-        port = self.config.port
-        id = self.id
-
-        if beacon_ip is None or beacon_port is None:
-            self.logger.error(f"missing beacon network info!")
-            return
-        
-        client = DiscoveryClient(beacon_ip, beacon_port, port, id)
-        peerlist = client.get_peerlist()
-        if peerlist is not None:
-            self.config.peerlist = peerlist
-
 
     def _init_network(self):
-        self.network = Network(self.id, self.config.port)
+        self.network = Network(self.id, self.config.port, self.config.beacon_ip, self.config.beacon_port)
+        self.config.peerlist = self.network.get_peerlist_from_beacon()
 
         if self.config.peerlist is not None:
             for peer in self.config.peerlist:
@@ -200,6 +186,21 @@ class Node:
         else:
             self.broadcast_message(BlockBroadcast(block))
 
+    def control_number_of_peers(self):
+        if len(self.network.known_peers) < MINIMUM_N_PEERS: 
+            additional_peerlist = self.network.get_additional_peers_from_beacon() # peers are randomly selected by beacon and come in a random order
+            if additional_peerlist is not None:
+                for peer in additional_peerlist: # TODO maybe limit number of peers added here?
+                    if peer.id == self.id or peer.id in self.network.known_peers:
+                        continue
+                    self.network.connect(peer.ip, peer.port, peer.id)
+
+        while len(self.network.known_peers) > MAXIMUM_N_PEERS:
+            random_peer_id = random.sample(self.network.known_peers, 1)[0]
+            self.logger.debug(f" Too many peers: {len(self.network.known_peers)}, forgetting peer: {random_peer_id.hex()[0:8]}")
+            self.send_message(random_peer_id, PeerForgetRequest(self.id))
+            self.network.forget_peer(random_peer_id)
+
     def loop(self):
         round = self.bc.genesis.timestamp
         while True:
@@ -223,6 +224,7 @@ class Node:
             # on round change:
             if round != self.bc.current_round:
                 self.logger.debug(f"state: {self.state}")
+                self.network.notify_beacon() #  Notifies beacon this node is still alive and connected to the network
                 # TODO: make the log_dir configurable (and maybe
                 # don't log every single round...)
                 self.dump_data("demo/logs")
@@ -245,13 +247,17 @@ class Node:
 
             if self.state == State.LISTENING:
                 if isinstance(msg, BlockBroadcast):
-                    self.handle_new_block(msg.block)    
+                    self.handle_new_block(msg.block)
                 if isinstance(msg, ResyncRequest):
                     peer_id = msg.peer_id
                     # make sure we only send stuff after the genesis block
                     count = max(msg.block_count, self.bc.number_of_blocks() - 1)
                     block_list = self.bc.last_n_blocks(count)
                     self.send_message(peer_id, ResyncResponse(block_list))
+                if isinstance(msg, PeerForgetRequest):
+                    self.logger.debug(f"Received forget request from: {msg.peer_id.hex()[0:8]}")
+                    self.network.forget_peer(msg.peer_id)
+                    
 
             if self.state == State.RESYNCING:
                 if isinstance(msg, ResyncResponse):
@@ -266,6 +272,7 @@ class Node:
                     block_list = self.bc.last_n_blocks(count) 
                     self.send_message(peer_id, ResyncResponse(block_list))
 
+            self.control_number_of_peers()
 
     def start(self):
         self.should_halt = False
