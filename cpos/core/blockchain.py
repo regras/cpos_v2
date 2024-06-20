@@ -118,13 +118,14 @@ class BlockChain:
                 self.confirm_block(oldest_id)
                 self.last_confirmation_delay = self.current_round - self.last_confirmed_block_round()
 
-            fork_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
+            fork_thresh = fork_threshold(total_stake=self.parameters.total_stake,
                                    tau=self.parameters.tau,
                                    delta_r=delta_r,
                                    threshold=0.95)
 
             if successful_avg < fork_thresh:
                 self.fork_detected = True
+                self.logger.info(f"fork detected!")
 
     def _log_failed_verification(self, block: Block, reason: str):
         self.logger.debug(f"failed to verify block {block.hash.hex()} ({reason})")

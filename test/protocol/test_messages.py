@@ -23,7 +23,7 @@ def test_block_broadcast_serialization():
                      round = 2,
                      index = 2,
                      ticket_number = 1)
-    msg = BlockBroadcast(original)
+    msg = BlockBroadcast(original, b"peer_id")
     deserialized = BlockBroadcast.deserialize(msg.serialize()).block
     assert original.hash == deserialized.hash
     assert original.parent_hash == deserialized.parent_hash

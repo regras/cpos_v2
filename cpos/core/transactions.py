@@ -27,8 +27,9 @@ HOST = "localhost"
 USER = "CPoS"
 PASSWORD = "CPoSPW"
 DATABASE = "mempool"
-RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY value DESC LIMIT 1"
-PATCH_QUERY = "UPDATE transactions SET chosen = 1 WHERE transaction_id = %s"
+# This retrieve query has a limit of 200 for memory safety purposes. You can change if you want.
+# This number was chosen considering we had at most 110 transactions during our tests for theses parameters.
+RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 ORDER BY value DESC LIMIT 200"
 BLOCK_SIZE = 199000     # 200kb - ~1kB of header
 
 class MockTransactionList(TransactionList):
@@ -40,26 +41,28 @@ class MockTransactionList(TransactionList):
                 password=PASSWORD,
                 database=DATABASE
             )
-            self.transaction_list = []
-            if fill_transactions:
-                cursor = connection.cursor()
-                totalSize = 0
+            cursor = connection.cursor(dictionary=True, buffered=True)
+            cursor.execute(RETRIEVE_QUERY)
 
-                while totalSize < BLOCK_SIZE:
-                    cursor.execute(RETRIEVE_QUERY)
-                    result = cursor.fetchone()
-                    totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
-                    if totalSize > BLOCK_SIZE:
-                        break
+            self.transactions = []
+            transaction_ids = []
+            totalSize = 0
 
-                    self.transaction_list.append(result)
+            result_set = cursor.fetchall()
 
-                    if result:
-                        cursor.execute(PATCH_QUERY, (result[0],))
-                        connection.commit()
+            for row in result_set:
+                totalSize += sum([sys.getsizeof(row[tuplePosition]) for tuplePosition in row.keys()])
+                if totalSize > BLOCK_SIZE:
+                    break
+                self.transactions.append(row)
+                transaction_ids.append(row['transaction_id'])
 
-                cursor.close()
-            self.transactions = str(self.transaction_list)
+            format_strings = ','.join(['%s'] * len(transaction_ids))
+            PATCH_QUERY = f"UPDATE transactions SET chosen = 1 WHERE transaction_id IN ({format_strings})"
+            cursor.execute(PATCH_QUERY, transaction_ids)
+            connection.commit()
+
+            cursor.close()
 
         except mysql.connector.Error as err:
             print(f"Error: {err}")
@@ -84,7 +87,7 @@ class MockTransactionList(TransactionList):
     def get_hash(self) -> bytes:
         return b"\x00" # TODO Provisory, code below does not work
         if self.transactions:
-            hash_bytes = bytes.fromhex(self.transactions) 
+            hash_bytes = bytes.fromhex(self.transactions[0]["transaction_hash"])
             return base64.b64encode(hash_bytes)
         else:
             return b"\x00"
