@@ -186,8 +186,10 @@ class Node:
             return False
         self.logger.info(f"trying to insert {block}")
         if not self.bc.insert(block):
-            if block not in self.bc:
+            if not self.bc.block_in_blockchain(block):
                 self.missed_blocks.append((block, peer_id))
+            #if block not in self.bc:
+            #    self.missed_blocks.append((block, peer_id))
         else:
             own_id = self.id if not None else self.config.id
             self.broadcast_message(BlockBroadcast(block, own_id))
@@ -261,8 +263,8 @@ class Node:
                     peer_id = msg.peer_id
                     # make sure we only send stuff after the genesis block
                     # If there are blocks available at this index, send it
-                    if len(self.bc.blocks) > abs(msg.block_index):
-                        block_to_send = self.bc.blocks[msg.block_index]
+                    if self.bc.number_of_blocks() > abs(msg.block_index):
+                        block_to_send = self.bc.block_by_index(msg.block_index)
                         self.send_message(peer_id, ResyncResponse(block_to_send))
                     # Else, send None to signal there are no blocks that match the request
                     else:
@@ -303,8 +305,8 @@ class Node:
                     peer_id = msg.peer_id
                     # make sure we only send stuff after the genesis block
                     # If there are blocks available at this index, send it
-                    if len(self.bc.blocks) > abs(msg.block_index):
-                        block_to_send = self.bc.blocks[msg.block_index]
+                    if self.bc.number_of_blocks() > abs(msg.block_index):
+                        block_to_send = self.bc.block_by_index(msg.block_index)
                         self.send_message(peer_id, ResyncResponse(block_to_send))
                     # Else, send None to signal there are no blocks that match the request
                     else:

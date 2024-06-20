@@ -226,11 +226,13 @@ class BlockChain:
         self.logger.info(f"starting merge process with fork: {foreign_blocks}")
         first_foreign_block = foreign_blocks[0]
 
-        id, idx = self.block_of_hash(first_foreign_block.parent_hash)
+        id_and_idx = self.block_of_hash(first_foreign_block.parent_hash)
 
-        if idx is None:
+        if id_and_idx is None:
             self.logger.error(f"foreign subchain has no common ancestor with local chain")
             return False
+        
+        id, idx = id_and_idx
 
         self.logger.info(f"found common ancestor: {id}")  
         # temporarily remove local fork from the chain
@@ -257,6 +259,14 @@ class BlockChain:
         cursor.execute("SELECT * FROM localChains")
         for block in cursor:
             print(block)
+        connection.commit()
+        cursor.close()
+
+    def _dump_indexes(self):
+        cursor = connection.cursor()
+        cursor.execute("SELECT block_index FROM localChains")
+        for index in cursor:
+            print(index)
         connection.commit()
         cursor.close()
 
@@ -396,14 +406,16 @@ class BlockChain:
         return block_hash
     
     def block_of_hash(self, hash):
+        # Returns a two element list in format [id, block_index] or None
         cursor = connection.cursor()
         BLOCK_OF_HASH_QUERY = f'SELECT id, block_index FROM localChains WHERE hash = "{hash.hex()}" ORDER BY block_index ASC LIMIT 1'
         cursor.execute(BLOCK_OF_HASH_QUERY)
-        id, index = cursor.fetchone()
-        if id != None:
-            id = bytes.fromhex(id)
+        info = cursor.fetchone()
+        if info != None:
+            info = list(info)
+            info[0] = bytes.fromhex(info[0])
         cursor.close()
-        return id, index
+        return info
     
     def blocks_since_index(self, index):
         cursor = connection.cursor()
@@ -431,3 +443,13 @@ class BlockChain:
             block_list.append(self.compose_block(block_info))
         cursor.close()
         return block_list
+
+    def block_by_index(self, block_index):
+        # Returns in the form of a Block class
+        if block_index < 0:
+            block_index = self.number_of_blocks() + block_index
+        cursor = connection.cursor()
+        cursor.execute(f"SELECT * FROM localChains WHERE block_index = {block_index}")
+        block_info = cursor.fetchone()
+        cursor.close()
+        return self.compose_block(block_info)
