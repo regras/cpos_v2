@@ -257,7 +257,7 @@ class BlockChain:
 
     def _dump_state(self):
         cursor = connection.cursor()
-        cursor.execute("SELECT * FROM localChains")
+        cursor.execute("SELECT * FROM localChains ORDER BY block_index ASC")
         for block in cursor:
             print(block)
         connection.commit()
@@ -265,7 +265,7 @@ class BlockChain:
 
     def _dump_indexes(self):
         cursor = connection.cursor()
-        cursor.execute("SELECT block_index FROM localChains")
+        cursor.execute("SELECT block_index FROM localChains ORDER BY block_index ASC")
         for index in cursor:
             print(index)
         connection.commit()
