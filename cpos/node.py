@@ -128,9 +128,10 @@ class Node:
             return None
         return Message.deserialize(raw)
 
-    def broadcast_message(self, msg: Message):
+    def broadcast_message(self, msg: Message, invalid_peers: list):
         for peer in self.network.known_peers:
-            self.send_message(peer, msg)
+            if not peer in invalid_peers:
+                self.send_message(peer, msg)
 
     def greet_peers(self):
         for peer_id in self.network.known_peers:
@@ -193,7 +194,7 @@ class Node:
             #    self.missed_blocks.append((block, peer_id))
         else:
             own_id = self.id if not None else self.config.id
-            self.broadcast_message(BlockBroadcast(block, own_id))
+            self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 
@@ -244,7 +245,7 @@ class Node:
                 if new_block is not None:
                     self.bc.insert(new_block)
                     own_id = self.id if not None else self.config.id
-                    self.broadcast_message(BlockBroadcast(new_block, own_id))
+                    self.broadcast_message(BlockBroadcast(new_block, own_id), [])
 
             # the 200ms timeout prevents us from busy-waiting
             raw = self.network.read(timeout=200)
