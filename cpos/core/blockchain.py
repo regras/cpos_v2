@@ -90,6 +90,7 @@ class BlockChain:
         self.current_round = round
 
         self.logger.info(f"starting round {round}")
+        self._dump_block_hashes()
 
         # verify whether we can confirm the oldest unconfirmed block or
         # whether a fork has been detected
@@ -269,12 +270,21 @@ class BlockChain:
             print(index)
         connection.commit()
         cursor.close()
+    
+    def _dump_block_hashes(self):
+        block_hashes = []
+        cursor = connection.cursor()
+        cursor.execute("SELECT hash FROM localChains ORDER BY block_index ASC")
+        for hash in cursor:
+            block_hashes.append(hash[0][0:min(len(hash[0]),8)])
+        connection.commit()
+        cursor.close()
+        self.logger.info(f"current chain: {block_hashes}")
 
     def insert_block(self, block: Block, arrive_time: int, confirmed: int):
         database_atributes = [block.index, block.hash.hex(), block.round, block.parent_hash.hex(), block.hash.hex(), block.owner_pubkey.hex(), block.signed_node_hash.hex(), block.transaction_hash.hex(), block.ticket_number,
                             block.transactions, arrive_time, 0, confirmed, 0, block.proof_hash.hex(), 0, 0] # TODO hash as id? TODO implement real merkle tree
         cursor = connection.cursor()
-        self.logger.info(str(int.from_bytes(block.hash)))
         INSERT_QUERY = "INSERT INTO localChains (block_index, id, round, parent_hash, hash, owner_pubkey, signed_node_hash, merkle_root, ticket_number, transactions, arrive_time, fork, confirmed, subuser, proof_hash, numSuc, round_stable) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
         cursor.execute(INSERT_QUERY, database_atributes)
         connection.commit()

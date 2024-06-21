@@ -283,10 +283,16 @@ class Node:
                     # If the peer doesn't have useful blocks, ask to another random peer
                     if not msg.block_received:
                         self.received_resync_blocks = []
-                        missed: tuple[Block, bytes] = random.choice(self.missed_blocks)
-                        self.missed_blocks.remove(missed)
-                        request_index = -1
-                        self.send_message(missed[1], ResyncRequest(self.id, request_index))
+                        if self.missed_blocks:
+                            missed: tuple[Block, bytes] = random.choice(self.missed_blocks)
+                            self.missed_blocks.remove(missed)
+                            request_index = -1
+                            self.send_message(missed[1], ResyncRequest(self.id, request_index))
+                        else:
+                            self.state = State.LISTENING
+                            self.received_resync_blocks = []
+                            self.bc.fork_detected = False
+                            self.logger.info("resync finished unsuccessfully!")
 
                     # If the resync is successful, finish the resync
                     elif self.bc.merge(self.received_resync_blocks):
