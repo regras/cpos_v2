@@ -5,7 +5,7 @@ import pickle
 import sys
 
 class TransactionList:
-    def __init__(self, fill_transactions: bool):
+    def __init__(self):
         self.data = b""
         self.transactions = str([])
         pass
@@ -33,7 +33,7 @@ RETRIEVE_QUERY = "SELECT * FROM transactions WHERE committed = 0 and chosen = 0 
 BLOCK_SIZE = 199000     # 200kb - ~1kB of header
 
 class MockTransactionList(TransactionList):
-    def __init__(self, fill_transactions: bool):
+    def __init__(self):
         try:
             connection = mysql.connector.connect(
                 host=HOST,

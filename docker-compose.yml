@@ -50,6 +50,9 @@ services:
       - TAU=10
       - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=false           # set to true to use randomly generated transactions
+      - MAXIMUM_NUM_PEERS=8          # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=4          # minimum number of peers a node can have
+      - NUM_PEERS_SEND = 5           # number of peers sent by beacon to nodes who just entered or need more
       
       # Be careful not to commit the following information to github
       - SSH_ADDRESS=
