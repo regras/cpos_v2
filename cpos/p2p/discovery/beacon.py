@@ -104,6 +104,8 @@ class Beacon:
                 self.reply_queue.append((addr, port))
 
             if isinstance(msg, NotifyBeacon):
+                addr = msg.ip
+                peer = Peer(addr, msg.port, msg.id)
                 self.peers_still_alive_flags[msg.id] = 1
                 if not peer in self.peers:
                     self.peers.append(peer)
