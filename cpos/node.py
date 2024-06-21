@@ -16,8 +16,6 @@ from cpos.protocol.messages import BlockBroadcast, Hello, Message, ResyncRequest
 
 from cpos.p2p.peer import Peer
 
-MINIMUM_N_PEERS = 3
-MAXIMUM_N_PEERS = 5
 
 class NodeConfig:
     def __init__(self, **kwargs):
@@ -43,6 +41,9 @@ class Node:
 
         use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "false")
         use_mock_transactions = use_mock_transactions in ("true")
+
+        self.maximum_num_peers = int(os.environ.get("MAXIMUM_NUM_PEERS", "8"))
+        self.minimum_num_peers = int(os.environ.get("MINIMUM_NUM_PEERS", "4"))
 
         self.use_mock_transactions = use_mock_transactions
 
@@ -187,7 +188,7 @@ class Node:
             self.broadcast_message(BlockBroadcast(block))
 
     def control_number_of_peers(self):
-        if len(self.network.known_peers) < MINIMUM_N_PEERS: 
+        if len(self.network.known_peers) < self.minimum_num_peers: 
             additional_peerlist = self.network.get_additional_peers_from_beacon() # peers are randomly selected by beacon and come in a random order
             if additional_peerlist is not None:
                 for peer in additional_peerlist: # TODO maybe limit number of peers added here?
@@ -195,7 +196,7 @@ class Node:
                         continue
                     self.network.connect(peer.ip, peer.port, peer.id)
 
-        while len(self.network.known_peers) > MAXIMUM_N_PEERS:
+        while len(self.network.known_peers) > self.maximum_num_peers:
             random_peer_id = random.sample(self.network.known_peers, 1)[0]
             self.logger.debug(f" Too many peers: {len(self.network.known_peers)}, forgetting peer: {random_peer_id.hex()[0:8]}")
             self.send_message(random_peer_id, PeerForgetRequest(self.id))

@@ -5,10 +5,10 @@ import threading
 from typing import cast
 from threading import Thread, Semaphore
 from time import time
+import os
 
 from cpos.p2p.peer import Peer
 from cpos.p2p.discovery.messages import Message, MessageCode, Hello, PeerList, PeerListRequest, NotifyBeacon
-N_PEERS_SENT = 5
 
 class Beacon:
     def __init__(self, port: int, instant_reply: bool = True):
@@ -33,6 +33,7 @@ class Beacon:
         self.round_time = 20 # has to be the same round time as nodes
         self.current_round = 0
         self.initial_timestamp = time() # This doesnt need to be sincronized with the nodes, it only needs to have the same round time
+        self.num_peers_send = int(os.environ.get("NUM_PEERS_SEND", "5"))
 
         self.instant_reply = instant_reply
         self.should_halt = False
@@ -92,7 +93,7 @@ class Beacon:
                     self.logger.info(f"registering new peer ({peer.id.hex()[0:8]}, {peer.ip}:{peer.port})")
 
             if self.instant_reply and (isinstance(msg, Hello) or isinstance(msg, PeerListRequest)):
-                count = min(N_PEERS_SENT, len(self.peers))
+                count = min(self.num_peers_send, len(self.peers))
                 random_peers = random.sample(self.peers, count)
                 reply = PeerList(random_peers)
                 try:
@@ -127,7 +128,7 @@ class Beacon:
             except Exception as e:
                 self.logger.error(f"unable to send reply to ({addr}, {port}): {e}")
 
-    def broadcast_random_peers(self, count: int = N_PEERS_SENT):
+    def broadcast_random_peers(self, count: int = 5):
         self.logger.info("replying to peerlist requests")
         self.logger.debug(f"known peers: {self.peers}")
         count = min(count, len(self.peers))
