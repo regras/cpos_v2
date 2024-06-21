@@ -271,7 +271,7 @@ class BlockChain:
 
     def compose_block(self, block_info):
         # Receives a line from the database containing block info and returns a block with that info
-        transaction_list = TransactionList(fill_transactions=False)
+        transaction_list = TransactionList()
         transaction_list.set_transactions(block_info[9])
         b = Block(parent_hash=bytes.fromhex(block_info[3]),
                 owner_pubkey=bytes.fromhex(block_info[5]), 

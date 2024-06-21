@@ -41,7 +41,7 @@ class Node:
     def __init__(self, config: NodeConfig):
         self.config = config
 
-        use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "true")
+        use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "false")
         use_mock_transactions = use_mock_transactions in ("true")
 
         self.use_mock_transactions = use_mock_transactions
@@ -148,9 +148,9 @@ class Node:
         candidate: Optional[Block] = None
         for i in range(0, stake):
             if self.use_mock_transactions:
-                tx = MockTransactionList(fill_transactions=True)
+                tx = MockTransactionList()
             else:
-                tx = TransactionList(fill_transactions=True)
+                tx = TransactionList()
 
             block = Block(parent_hash=self.bc.get_last_block_hash(),
                           transactionlist=tx,

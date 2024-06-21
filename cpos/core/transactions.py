@@ -5,7 +5,7 @@ import pickle
 import sys
 
 class TransactionList:
-    def __init__(self, fill_transactions: bool):
+    def __init__(self):
         self.data = b""
         self.transactions = str([])
         pass
@@ -32,7 +32,7 @@ PATCH_QUERY = "UPDATE transactions SET chosen = 1 WHERE transaction_id = %s"
 BLOCK_SIZE = 199000     # 200kb - ~1kB of header
 
 class MockTransactionList(TransactionList):
-    def __init__(self, fill_transactions: bool):
+    def __init__(self):
         try:
             connection = mysql.connector.connect(
                 host=HOST,
@@ -41,24 +41,23 @@ class MockTransactionList(TransactionList):
                 database=DATABASE
             )
             self.transaction_list = []
-            if fill_transactions:
-                cursor = connection.cursor()
-                totalSize = 0
+            cursor = connection.cursor()
+            totalSize = 0
 
-                while totalSize < BLOCK_SIZE:
-                    cursor.execute(RETRIEVE_QUERY)
-                    result = cursor.fetchone()
-                    totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
-                    if totalSize > BLOCK_SIZE:
-                        break
+            while totalSize < BLOCK_SIZE:
+                cursor.execute(RETRIEVE_QUERY)
+                result = cursor.fetchone()
+                totalSize += sum([sys.getsizeof(result[tuplePosition]) for tuplePosition in range(len(result))])
+                if totalSize > BLOCK_SIZE:
+                    break
 
-                    self.transaction_list.append(result)
+                self.transaction_list.append(result)
 
-                    if result:
-                        cursor.execute(PATCH_QUERY, (result[0],))
-                        connection.commit()
+                if result:
+                    cursor.execute(PATCH_QUERY, (result[0],))
+                    connection.commit()
 
-                cursor.close()
+            cursor.close()
             self.transactions = str(self.transaction_list)
 
         except mysql.connector.Error as err:

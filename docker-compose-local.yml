@@ -15,17 +15,17 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 10
+      replicas: 6
     volumes:
       - .:/cpos
     environment:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
-      - ROUND_TIME=5
+      - ROUND_TIME=20
       - TOLERANCE=2
-      - TAU=10
-      - TOTAL_STAKE=25
+      - TAU=3
+      - TOTAL_STAKE=6
       - MOCK_TRANSACTIONS=false           # set to true to use randomly generated transactions
 
       # Be careful not to commit the following information to github
