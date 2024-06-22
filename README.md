@@ -44,9 +44,9 @@ To run with distributed nodes, you should have a [Docker Swarm set up](https://d
 
 After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
 
-1. SSH_ADDRESS: user@address of the machine you want to send the data to;
-2. SSH_PASSWORD: the password for the account;
-3. SCP_PATH: the full path where you want to send the data to.
+1. `SSH_ADDRESS`: user@address of the machine you want to send the data to;
+2. `SSH_PASSWORD`: the password for the account;
+3. `SCP_PATH`: the full path where you want to send the data to.
 
 Now, with everything configured, you can start the scheme with the following commands:
 
