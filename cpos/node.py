@@ -89,6 +89,7 @@ class Node:
         self.total_message_bytes = 0
         
         self.should_halt: bool = False
+        self.dishonest = False
 
     # TODO: make the log_dir configurable
     def dump_data(self, log_dir: str):
@@ -129,6 +130,8 @@ class Node:
         return Message.deserialize(raw)
 
     def broadcast_message(self, msg: Message, invalid_peers: list):
+        if self.dishonest: # dishonest nodes dont broadcast blocks
+            return
         for peer in self.network.known_peers:
             if not peer in invalid_peers:
                 self.send_message(peer, msg)

@@ -3,6 +3,9 @@ from os.path import join
 import pickle
 import graphviz
 
+import os
+print(os.getcwd())
+
 from cpos.core.blockchain import BlockChain
 
 # NOT ADAPTED TO CURRENT CODE
@@ -49,25 +52,27 @@ def plot_bc(bc: BlockChain, filename: str):
     block_count = 0
     dot = graphviz.Graph(filename)
     dot.format = "png"
-    for block in bc.blocks:
+    blocks = bc.last_n_blocks(bc.number_of_blocks())
+    last_confirmed_block_index, last_confirmed_block_id, last_confirmed_block_round = bc.last_confirmed_block_info()
+    for block in blocks:
         print(block)
         block_count += 1
-        if block == bc.last_confirmed_block:
+        if block.hash.hex() == last_confirmed_block_id:
             confirmed_blocks = block_count
             print("=== [UNCONFIRMED BLOCKS] ===")
         dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> <TR> <TD> owner: [{block.owner_pubkey.hex()[0:8]}] </TD> </TR> </TABLE>>")
 
     # confirmed blocks per minute
-    throughput = bc.last_confirmed_block.index * 60 / (bc.parameters.round_time * bc.current_round)
+    throughput = last_confirmed_block_index * 60 / (bc.parameters.round_time * bc.current_round)
     # block confirmation time
     confirmation_delay = bc.last_confirmation_delay * bc.parameters.round_time
 
-    for i in range(0, len(bc.blocks) - 1):
+    for i in range(0, len(blocks) - 1):
         dot.edge(f"{i}", f"{i+1}")
 
     dot.render(directory="demo/logs")
 
-    return throughput, confirmation_delay, len(bc.blocks), confirmed_blocks
+    return throughput, confirmation_delay, len(blocks), confirmed_blocks
 
 if __name__ == "__main__":
     main()

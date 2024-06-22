@@ -97,7 +97,9 @@ class BlockChain:
         # (this fork detection logic really, REALLY needs to be its own class)
 
         # should only happen if the chain only has the genesis block
-        if self.last_confirmed_block_id() == self.last_block_id():
+        last_confirmed_block_index, last_confirmed_block_id, last_confirmed_block_round = self.last_confirmed_block_info()
+
+        if last_confirmed_block_id == self.last_block_id(): 
             return
 
         oldest_index, oldest_id, oldest_numSuc, oldest_round = self.oldest_unconfirmed_block()
@@ -117,7 +119,7 @@ class BlockChain:
             if successful_avg > conf_thresh:
                 self.logger.info(f"confirmed block {oldest_id}")
                 self.confirm_block(oldest_id)
-                self.last_confirmation_delay = self.current_round - self.last_confirmed_block_round()
+                self.last_confirmation_delay = self.current_round - last_confirmed_block_round 
 
             fork_thresh = fork_threshold(total_stake=self.parameters.total_stake,
                                    tau=self.parameters.tau,
@@ -341,20 +343,14 @@ class BlockChain:
         cursor.execute(f"DELETE FROM localChains WHERE block_index >= {index}")
         connection.commit()
         cursor.close()
-
-    def last_confirmed_block_id(self):
+    
+    def last_confirmed_block_info(self):
         cursor = connection.cursor()
-        cursor.execute("SELECT id FROM localChains WHERE confirmed = 1 ORDER BY block_index DESC LIMIT 1")
-        id = bytes.fromhex(cursor.fetchone()[0])
+        cursor.execute("SELECT block_index, id, round FROM localChains WHERE confirmed = 1 ORDER BY block_index DESC LIMIT 1")
+        block_index, id, round = cursor.fetchone()
         cursor.close()
-        return id
-
-    def last_confirmed_block_round(self):
-        cursor = connection.cursor()
-        cursor.execute("SELECT round FROM localChains WHERE confirmed = 1 ORDER BY block_index DESC LIMIT 1")
-        round = cursor.fetchone()[0]
-        cursor.close()
-        return round
+        id = bytes.fromhex(id)
+        return block_index, id, round
     
     def last_block_id(self):
         cursor = connection.cursor()
