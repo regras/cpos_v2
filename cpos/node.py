@@ -89,7 +89,6 @@ class Node:
         self.total_message_bytes = 0
         
         self.should_halt: bool = False
-        self.dishonest = False
 
     # TODO: make the log_dir configurable
     def dump_data(self, log_dir: str):
@@ -98,7 +97,8 @@ class Node:
         self.logger.warning(f"Dumping data to {filepath}...")
         try:
             with open(filepath, "wb") as file:
-                data = pickle.dumps((self.bc, self.message_count, self.total_message_bytes))
+                blockchain_info = [self.bc.parameters.round_time, self.bc.last_confirmation_delay, self.bc.current_round]
+                data = pickle.dumps((self.bc.last_n_blocks(self.bc.number_of_blocks()), self.bc.last_confirmed_block_info(), self.message_count, self.total_message_bytes, blockchain_info))
                 file.write(data)
                 file.flush()
                 file.close()
@@ -130,8 +130,6 @@ class Node:
         return Message.deserialize(raw)
 
     def broadcast_message(self, msg: Message, invalid_peers: list):
-        if self.dishonest: # dishonest nodes dont broadcast blocks
-            return
         for peer in self.network.known_peers:
             if not peer in invalid_peers:
                 self.send_message(peer, msg)
