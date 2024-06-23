@@ -89,6 +89,8 @@ class Node:
         self.total_message_bytes = 0
         
         self.should_halt: bool = False
+        percentage_dishonest = int(os.environ.get("PERCENTAGE_DISHONEST", "0"))
+        self.dishonest = random.randint(1, 100) <= percentage_dishonest
 
     # TODO: make the log_dir configurable
     def dump_data(self, log_dir: str):
@@ -130,6 +132,8 @@ class Node:
         return Message.deserialize(raw)
 
     def broadcast_message(self, msg: Message, invalid_peers: list):
+        if self.dishonest:
+            return
         for peer in self.network.known_peers:
             if not peer in invalid_peers:
                 self.send_message(peer, msg)

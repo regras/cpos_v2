@@ -33,7 +33,7 @@ class Beacon:
         self.round_time = 20 # has to be the same round time as nodes
         self.current_round = 0
         self.initial_timestamp = time() # This doesnt need to be sincronized with the nodes, it only needs to have the same round time
-        self.num_peers_send = int(os.environ.get("NUM_PEERS_SEND", "5"))
+        self.num_peers_send = int(os.environ.get("NUM_PEERS_SEND", "5")) # TODO: doesnt work, the environment isnt the one described at docker-compose-local.yml. Therefore always returns 5
 
         self.instant_reply = instant_reply
         self.should_halt = False
