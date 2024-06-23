@@ -55,7 +55,7 @@ $ docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node
 $ docker stack deploy -c docker-compose.yml cpos
 ```
 
-You have to remove the cpos_node service and then deploy the stack again because the cpos_node has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name.
+You have to remove the cpos_node service and then deploy the stack again because the cpos_node has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name. There's a possibility the first command will fail if the cpos_test_network is not created by the time cpos_node or cpos_beacon is deployed. If this happens, run the command again. Unfortunately, we cannot guarantee the order of deploy with Docker Swarm.
 
 If you want to monitor the logs to see what's going on, you can use these commands:
 
