@@ -52,7 +52,7 @@ def plot_bc(bc, last_confirmed_block_info, filename: str, blockchain_info: list)
     dot.format = "png"
     last_confirmed_block_index, last_confirmed_block_id, last_confirmed_block_round = last_confirmed_block_info
     round_time, last_confirmation_delay, current_round = blockchain_info
-    confitmed_blocks = 0
+    confirmed_blocks = 0
     for block in bc:
         print(block)
         block_count += 1
