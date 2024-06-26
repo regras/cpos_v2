@@ -41,11 +41,16 @@ class Node:
 
         use_mock_transactions = os.environ.get("MOCK_TRANSACTIONS", "false")
         use_mock_transactions = use_mock_transactions in ("true")
+        self.use_mock_transactions = use_mock_transactions
+
+        broadcast_created_block = os.environ.get("BROADCAST_CREATED_BLOCK", "true")
+        self.broadcast_created_block = broadcast_created_block in ("true")
+
+        broadcast_received_block = os.environ.get("BROADCAST_RECEIVED_BLOCK", "true")
+        self.broadcast_received_block = broadcast_received_block in ("true")
 
         self.maximum_num_peers = int(os.environ.get("MAXIMUM_NUM_PEERS", "8"))
         self.minimum_num_peers = int(os.environ.get("MINIMUM_NUM_PEERS", "4"))
-
-        self.use_mock_transactions = use_mock_transactions
 
         if self.config.privkey is not None:
             self.privkey = Ed25519PrivateKey.from_private_bytes(self.config.privkey)
@@ -89,8 +94,6 @@ class Node:
         self.total_message_bytes = 0
         
         self.should_halt: bool = False
-        percentage_dishonest = int(os.environ.get("PERCENTAGE_DISHONEST", "0"))
-        self.dishonest = random.randint(1, 100) <= percentage_dishonest
 
     # TODO: make the log_dir configurable
     def dump_data(self, log_dir: str):
@@ -132,8 +135,6 @@ class Node:
         return Message.deserialize(raw)
 
     def broadcast_message(self, msg: Message, invalid_peers: list):
-        if self.dishonest:
-            return
         for peer in self.network.known_peers:
             if not peer in invalid_peers:
                 self.send_message(peer, msg)
@@ -199,7 +200,8 @@ class Node:
             #    self.missed_blocks.append((block, peer_id))
         else:
             own_id = self.id if not None else self.config.id
-            self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
+            if self.broadcast_received_block:
+                self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 
@@ -247,10 +249,11 @@ class Node:
                 self.dump_data("demo/logs")
                 round = self.bc.current_round
                 new_block = self.generate_block()
-                if new_block is not None:
+                if new_block is not None and self.broadcast_created_block: # if dishonest node isnt going to broadcast block, it is also not going to insert in local blockchain
                     self.bc.insert(new_block)
                     own_id = self.id if not None else self.config.id
-                    self.broadcast_message(BlockBroadcast(new_block, own_id), [])
+                    if self.broadcast_created_block:
+                        self.broadcast_message(BlockBroadcast(new_block, own_id), [])
 
             # the 200ms timeout prevents us from busy-waiting
             raw = self.network.read(timeout=200)
