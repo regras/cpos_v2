@@ -31,7 +31,7 @@ class RandomTransactionGenerator:
     def generate_random_transactions(self) -> tuple:
         value = np.random.normal(100,20)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        data = self.generate_random_string(int(np.random.normal(140, 20)))
+        data = self.generate_random_string(int(np.random.normal(100, 20)))
 
         transaction_hash = self.generate_hash(
             str(self.transaction_id) +
@@ -63,7 +63,9 @@ class RandomTransactionGenerator:
     def generate_hash(self, data:str) -> str:
         sha = hashlib.sha256()
         sha.update(base64.b64encode(data.encode('ASCII')))
-        return sha.digest()
+        hash_bytes = sha.digest()
+        hash_string = base64.b64encode(hash_bytes).decode('ASCII')
+        return hash_string
     
     def generate_random_string(self, length:int) -> str:
         random_string = ""
@@ -105,4 +107,3 @@ def populate_mempool() -> None:
 
 if __name__ == "__main__":
     populate_mempool()
-

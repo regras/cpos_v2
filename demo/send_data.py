@@ -10,6 +10,14 @@ def createSSHClient(hostname, user, password, port=22):
     client.connect(hostname, port, user, password)
     return client
 
+def create_remote_directory(ssh, remote_directory):
+    stdin, stdout, stderr = ssh.exec_command(f"mkdir -p {remote_directory}")
+    exit_status = stdout.channel.recv_exit_status()
+    if exit_status == 0:
+        print(f"Successfully created or verified directory: {remote_directory}")
+    else:
+        print(f"Error creating directory: {stderr.read().decode()}")
+
 ssh_address = os.environ.get("SSH_ADDRESS", "")
 ssh_password = os.environ.get("SSH_PASSWORD", "")
 scp_filepath = os.environ.get("SCP_PATH", "")
@@ -22,6 +30,10 @@ def send_data():
 
         ssh_user, ssh_hostname = ssh_address.split("@")
         ssh = createSSHClient(ssh_hostname, ssh_user, ssh_password)
+
+        # Create remote directory if it doesn't exist
+        create_remote_directory(ssh, scp_filepath)
+
         scp = SCPClient(ssh.get_transport())
         scp.put(files=local_filepath, remote_path=scp_filepath, recursive=True)
 
