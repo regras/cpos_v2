@@ -163,6 +163,8 @@ class Beacon:
             return
 
         self.current_round = round
+        self.logger.info(f"Beacon starting new round: {self.current_round}")
+
         if self.current_round % 3 == 0:
             self.manage_peer_forgetting()
 

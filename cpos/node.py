@@ -210,6 +210,7 @@ class Node:
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 
+            self.logger.info(f"Number of peers too low, asking more from beacon")
             additional_peerlist = self.network.get_additional_peers_from_beacon() # peers are randomly selected by beacon and come in a random order
             if additional_peerlist is not None:
                 for peer in additional_peerlist: # TODO maybe limit number of peers added here?
