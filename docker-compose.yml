@@ -16,7 +16,8 @@ services:
     #   - "9000:9000"
     environment:
       - PORT=9000
-      - NUM_PEERS_SEND=5           # number of peers sent by beacon to nodes who just entered or need more 
+      - NUM_PEERS_SEND=5           # number of peers sent by beacon to nodes who just entered or need more
+      - ROUND_TIME=20
     command: /bin/bash demo/run_beacon.sh
 
   node:
