@@ -148,6 +148,7 @@ class Beacon:
         for peer in self.peers:
             if self.peers_still_alive_flags[peer.id] == 0:
                 del self.peers_still_alive_flags[peer.id]
+                self.logger.info(f"Forgetting inactive peer {peer.id.hex()[0:8]}")
             else:
                 self.peers_still_alive_flags[peer.id] = 0
                 new_peerlist.append(peer)
