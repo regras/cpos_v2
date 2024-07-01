@@ -7,7 +7,7 @@ def createSSHClient(hostname, user, password, port=22):
     client = SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(AutoAddPolicy())
-    client.connect(hostname, port, user, password)
+    client.connect(hostname, port, user, password, banner_timeout=200)
     return client
 
 def create_remote_directory(ssh, remote_directory):
