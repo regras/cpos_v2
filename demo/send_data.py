@@ -22,22 +22,31 @@ ssh_address = os.environ.get("SSH_ADDRESS", "")
 ssh_password = os.environ.get("SSH_PASSWORD", "")
 scp_filepath = os.environ.get("SCP_PATH", "")
 local_filepath = "./demo/logs/"
+max_retries = 5
 
 def send_data():
 
     if ssh_address and ssh_password and scp_filepath:
-        print(f"Sending log files to {ssh_address} at {scp_filepath}")
+        for retry in range(max_retries):
+            try:
+                print(f"Sending log files to {ssh_address} at {scp_filepath}")
 
-        ssh_user, ssh_hostname = ssh_address.split("@")
-        ssh = createSSHClient(ssh_hostname, ssh_user, ssh_password)
+                ssh_user, ssh_hostname = ssh_address.split("@")
+                ssh = createSSHClient(ssh_hostname, ssh_user, ssh_password)
 
-        # Create remote directory if it doesn't exist
-        create_remote_directory(ssh, scp_filepath)
+                # Create remote directory if it doesn't exist
+                create_remote_directory(ssh, scp_filepath)
 
-        scp = SCPClient(ssh.get_transport())
-        scp.put(files=local_filepath, remote_path=scp_filepath, recursive=True)
+                scp = SCPClient(ssh.get_transport())
+                scp.put(files=local_filepath, remote_path=scp_filepath, recursive=True)
 
-        print("Finished copying log files!")
+                print("Finished copying log files!")
+                break
+            except:
+                if retry < max_retries - 1:
+                    print("Trying to send SCP again!")
+                else:
+                    print("Failed to send data through SCP")
 
     else:
         print("Couldn't send data! SSH address and/or password and/or scp path not specified.")
