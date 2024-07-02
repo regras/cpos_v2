@@ -17,7 +17,7 @@ echo "GENESIS_TIMESTAMP: $GENESIS_TIMESTAMP"
 poetry run python demo/main.py --beacon-ip $BEACON_IP --beacon-port $BEACON_PORT -p $PORT --genesis-timestamp $GENESIS_TIMESTAMP --total-rounds 30 &
 pid=$!
 
-# trap "send_data" INT TERM
+trap "send_data" INT TERM
 
 # Makes sure to execute demo/send_data.py before exiting
 send_data() {
