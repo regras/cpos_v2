@@ -56,7 +56,7 @@ def plot_bc(bc, last_confirmed_block_info, filename: str, blockchain_info: list)
     for block in bc:
         print(block)
         block_count += 1
-        if block.hash.hex() == last_confirmed_block_id:
+        if block.hash == last_confirmed_block_id:
             confirmed_blocks = block_count
             print("=== [UNCONFIRMED BLOCKS] ===")
         dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> <TR> <TD> owner: [{block.owner_pubkey.hex()[0:8]}] </TD> </TR> </TABLE>>")
