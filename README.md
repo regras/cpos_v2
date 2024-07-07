@@ -100,3 +100,23 @@ Finally, to remove the stack, run the following command:
 ```
 $ docker stack rm cpos
 ```
+
+## Running with distributed nodes
+
+In order to run the experiments automatically, you can use the bash script as follows:
+
+```
+$ ./demo/run_experiments.sh
+```
+
+With the configuration present on the Github version of this script, it will run the same experiments ran for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker compose file) adequately so that the logs are copied somewhere. After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
+
+```
+log_dir = join(cwd, "demo/logs/5_5_1")
+```
+
+Then, inside a poetry shell, you can process the data with the following command:
+
+```
+$ python demo/process_data.py
+```
