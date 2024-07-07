@@ -1,7 +1,7 @@
 from time import sleep
 from typing import Optional
 from cpos.p2p.peer import Peer
-from cpos.p2p.discovery.messages import Message, Hello, PeerList
+from cpos.p2p.discovery.messages import Message, Hello, PeerList, PeerListRequest, NotifyBeacon
 
 import fcntl
 import socket
@@ -66,6 +66,49 @@ class Client:
         
         if isinstance(msg, PeerList):
             return msg.peers
+
+    def get_additional_peers(self) -> Optional[list[Peer]]:
+
+        msg = PeerListRequest(self.id)
+
+        try:
+            self.socket.sendto(msg.serialize(), (self.beacon_ip, self.beacon_port))
+        except Exception as e:
+            self.logger.error(f"failed to contact beacon: {e}")
+            return None
+
+        wait = 2
+        self.logger.debug(f"sleeping for {wait} seconds")
+        sleep(wait)
+        self.logger.debug(f"listening for beacon response...")
+
+        response = None
+        try:
+            response = self.socket.recv(65535)
+            self.logger.debug(f"got response from beacon: {response}")
+        except Exception as e:
+            self.logger.error(f"error reading beacon response: {e}")
+            return None
+
+        try:
+            msg = Message.deserialize(response)
+            self.logger.debug(f"response: {msg}")
+        except Exception as e:
+            self.logger.error(f"failed to deserialize beacon response: {e}")
+            return None
+        
+        if isinstance(msg, PeerList):
+            return msg.peers
+
+    def notify_beacon(self) -> Optional[list[Peer]]:
+
+        msg = NotifyBeacon(self.port, self.id, self.ip)
+
+        try:
+            self.socket.sendto(msg.serialize(), (self.beacon_ip, self.beacon_port))
+        except Exception as e:
+            self.logger.error(f"failed to contact beacon: {e}")
+            return None
 
 
 def main():
