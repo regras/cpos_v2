@@ -28,10 +28,10 @@ services:
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
-      - TOTAL_STAKE=6
+      - TOTAL_STAKE=5
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
       - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
+      - MINIMUM_NUM_PEERS=3              # minimum number of peers a node can have
       - BROADCAST_CREATED_BLOCK=true     
       - BROADCAST_RECEIVED_BLOCK=true
 
@@ -49,7 +49,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 1
+      replicas: 0
     volumes:
       - .:/cpos
     environment:
@@ -59,10 +59,10 @@ services:
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
-      - TOTAL_STAKE=6
+      - TOTAL_STAKE=5
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
       - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
+      - MINIMUM_NUM_PEERS=3              # minimum number of peers a node can have
       - BROADCAST_CREATED_BLOCK=false
       - BROADCAST_RECEIVED_BLOCK=false
 
