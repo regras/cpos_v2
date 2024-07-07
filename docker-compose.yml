@@ -16,8 +16,8 @@ services:
     #   - "9000:9000"
     environment:
       - PORT=9000
-      - NUM_PEERS_SEND=5           # number of peers sent by beacon to nodes who just entered or need more
-      - ROUND_TIME=20
+      - NUM_PEERS_SEND=${NUM_PEER}           # number of peers sent by beacon to nodes who just entered or need more
+      - ROUND_TIME=${ROUND_TIME}
     command: /bin/bash demo/run_beacon.sh
 
   node:
@@ -27,9 +27,9 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 20
+      replicas: 25
       placement:
-          max_replicas_per_node: 1
+          max_replicas_per_node: 2
           constraints:
             - node.role == worker
             # - node.labels.mynode == deterlab
@@ -48,20 +48,20 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
-      - ROUND_TIME=20
+      - ROUND_TIME=${ROUND_TIME}
       - TOLERANCE=2
-      - TAU=3
-      - TOTAL_STAKE=6
+      - TAU=${TAU}
+      - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
-      - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
+      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS}              # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS}              # minimum number of peers a node can have
       - BROADCAST_CREATED_BLOCK=true     
       - BROADCAST_RECEIVED_BLOCK=true
       
       # Be careful not to commit the following information to github
       - SSH_ADDRESS=
       - SSH_PASSWORD=
-      - SCP_PATH=
+      - SCP_PATH=${SCP_PATH}
 
     command: /bin/bash demo/run_node.sh
 

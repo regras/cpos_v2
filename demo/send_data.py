@@ -1,5 +1,6 @@
 from paramiko import SSHClient, AutoAddPolicy
 from scp import SCPClient
+import time
 
 import os
 
@@ -7,7 +8,7 @@ def createSSHClient(hostname, user, password, port=22):
     client = SSHClient()
     client.load_system_host_keys()
     client.set_missing_host_key_policy(AutoAddPolicy())
-    client.connect(hostname, port, user, password, banner_timeout=200)
+    client.connect(hostname, port, user, password, banner_timeout=200, timeout=100)
     return client
 
 def create_remote_directory(ssh, remote_directory):
@@ -45,8 +46,14 @@ def send_data():
             except:
                 if retry < max_retries - 1:
                     print("Trying to send SCP again!")
+                    time.sleep(2)
                 else:
                     print("Failed to send data through SCP")
+            finally:
+                try:
+                    ssh.close()
+                except Exception:
+                    pass
 
     else:
         print("Couldn't send data! SSH address and/or password and/or scp path not specified.")
