@@ -60,7 +60,7 @@ $ docker compose --file docker-compose-local.yml down
 
 To run with distributed nodes, you should have a [Docker Swarm set up](https://docs.docker.com/engine/swarm/swarm-tutorial/) with only one Manager. Be sure to have the specified ports open on every node.
 
-After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0. 
+After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. For this article, the number of replicas of node_dishonest was kept at 0. 
 
 
 If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
@@ -109,7 +109,10 @@ In order to run the experiments automatically, you can use the bash script as fo
 $ ./demo/run_experiments.sh
 ```
 
-With the configuration present on the Github version of this script, it will run the same experiments ran for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
+With the configuration present on the Github version of this script, it will run the same experiments ran for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. It is also important that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. 
+
+
+After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
 
 ```
 log_dir = join(cwd, "demo/logs/5_5_1")
