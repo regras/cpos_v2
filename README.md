@@ -1,6 +1,6 @@
 # WTICG SBSeg24 Article
 
-This repository is tied to the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the "Workshop de Trabalhos de Iniciação Científica e de Graduação do XXIV Simpósio Brasileiro em Segurança da Informação e de Sistemas Computacionais".
+This repository is tied to the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the Workshop on Scientific Initiation and Undergraduate Works (WTICG), an event integrated with the Brazilian Symposium on Information and Computational Systems Security (SBSeg).
 
 Article's abstract: Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better known Proof-of-Work, and Proof-of-Stake, with its reduced power consumption and simpler design without validation committees. However, CPoS is still an emerging algorithm and requires extensive testing to validate its correctness and efficiency. Its first implementation was promising and showed satisfactory results, but it has been  enhanced continuously. This article aims to present the new characteristics added to CPoS and evaluate their impact on the data traffic and on the scheme as a whole.
 
