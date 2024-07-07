@@ -89,7 +89,7 @@ $ docker service logs --follow --raw cpos_beacon
 The first one refers to the node, and the second one to the beacon. You can press CTRL + C to exit the logs.
 
 
-After all the data has been collected and the resulting .data files have been moved into the folder demo/logs you can process the data by running the command:
+After all the data has been collected and the resulting .data files have been moved into the folder demo/logs you can process the data by running this command inside a poetry shell:
 
 ```
 $ python demo/process_data.py
@@ -101,7 +101,7 @@ Finally, to remove the stack, run the following command:
 $ docker stack rm cpos
 ```
 
-## Running with distributed nodes
+## Running with distributed nodes automatically
 
 In order to run the experiments automatically, you can use the bash script as follows:
 
@@ -109,7 +109,7 @@ In order to run the experiments automatically, you can use the bash script as fo
 $ ./demo/run_experiments.sh
 ```
 
-With the configuration present on the Github version of this script, it will run the same experiments ran for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker compose file) adequately so that the logs are copied somewhere. After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
+With the configuration present on the Github version of this script, it will run the same experiments ran for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
 
 ```
 log_dir = join(cwd, "demo/logs/5_5_1")
