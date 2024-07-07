@@ -1,6 +1,14 @@
-# cpos_v2
+# WTICG SBSeg24 Article
 
-A new and refactored version of CPoS.
+This repository is tied to the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the "Workshop de Trabalhos de Iniciação Científica e de Graduação do XXIV Simpósio Brasileiro em Segurança da Informação e de Sistemas Computacionais".
+
+Article's abstract: Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better known Proof-of-Work, and Proof-of-Stake, with its reduced power consumption and simpler design without validation committees. However, CPoS is still an emerging algorithm and requires extensive testing to validate its correctness and efficiency. Its first implementation was promising and showed satisfactory results, but it has been  enhanced continuously. This article aims to present the new characteristics added to CPoS and evaluate their impact on the data traffic and on the scheme as a whole.
+
+# Abstract
+
+This repository stores the source code used for collecting the data for the afformentioned article. The file README.md also gives instructions on how to run the simulations and collect the data.
+
+# Running the simulation
 
 ## Dependencies
 
@@ -10,7 +18,7 @@ A new and refactored version of CPoS.
 
 ## Building
 
-First off, install the project with
+After cloning the repository, go to the repository directory and install the project with:
 
 ```
 $ poetry install
@@ -22,9 +30,12 @@ Poetry automatically creates [isolated virtual environments](https://realpython.
 $ poetry shell
 ```
 
-## Running
+## Running local network (minimum test)
 
-To launch the demo blockchain:
+As a minimum test, you can run all the network's nodes in the local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed.
+
+
+In the poetry shell, you can launch a local network with the command:
 
 ```
 $ docker compose --file docker-compose-local.yml up
@@ -36,7 +47,14 @@ It will stop running when it gets to round 30. To process the generated data, ru
 $ python demo/process_data.py
 ```
 
-This will also generate a bunch of images inside `demo/logs`.
+This will also generate a bunch of images inside `demo/logs`. 
+
+
+After the simulation is done, be sure to run the following command to take down the docker nodes (specially before running another simulation).
+
+```
+$ docker compose --file docker-compose-local.yml down
+```
 
 ## Running with distributed nodes
 
