@@ -27,7 +27,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 20
+      replicas: 25
       placement:
           max_replicas_per_node: 1
           constraints:
@@ -51,7 +51,7 @@ services:
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
-      - TOTAL_STAKE=6
+      - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
       - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
       - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
@@ -96,7 +96,7 @@ services:
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
-      - TOTAL_STAKE=6
+      - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
       - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
       - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
