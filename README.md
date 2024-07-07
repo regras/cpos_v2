@@ -32,10 +32,10 @@ $ poetry shell
 
 ## Running local network (minimum test)
 
-As a minimum test, you can run all the network's nodes in the local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed.
+As a minimum test, you can run all the network's nodes in the local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0.
 
 
-In the poetry shell, you can launch a local network with the command:
+You can launch a local network with the command:
 
 ```
 $ docker compose --file docker-compose-local.yml up
@@ -60,7 +60,10 @@ $ docker compose --file docker-compose-local.yml down
 
 To run with distributed nodes, you should have a [Docker Swarm set up](https://docs.docker.com/engine/swarm/swarm-tutorial/) with only one Manager. Be sure to have the specified ports open on every node.
 
-After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
+After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0. 
+
+
+If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
 
 1. `SSH_ADDRESS`: user@address of the machine you want to send the data to;
 2. `SSH_PASSWORD`: the password for the account;
@@ -83,6 +86,13 @@ $ docker service logs --follow --raw cpos_beacon
 ```
 
 The first one refers to the node, and the second one to the beacon. You can press CTRL + C to exit the logs.
+
+
+After all the data has been collected and the resulting .data files have been moved into the folder demo/logs you can process the data by running the command:
+
+```
+$ python demo/process_data.py
+```
 
 Finally, to remove the stack, run the following command:
 
