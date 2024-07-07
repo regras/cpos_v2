@@ -2,11 +2,11 @@
 
 This repository is tied to the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the Workshop on Scientific Initiation and Undergraduate Works (WTICG), an event integrated with the Brazilian Symposium on Information and Computational Systems Security (SBSeg).
 
-Article's abstract: Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better known Proof-of-Work, and Proof-of-Stake, with its reduced power consumption and simpler design without validation committees. However, CPoS is still an emerging algorithm and requires extensive testing to validate its correctness and efficiency. Its first implementation was promising and showed satisfactory results, but it has been  enhanced continuously. This article aims to present the new characteristics added to CPoS and evaluate their impact on the data traffic and on the scheme as a whole.
+Article's abstract: Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better-known Proof-of-Work and Proof-of-Stake, with its reduced power consumption and more straightforward design without validation committees. However, CPoS is still an emerging algorithm and requires extensive testing to validate its correctness and efficiency. Its first implementation was promising and showed satisfactory results, but it has been enhanced continuously. This article aims to present the new characteristics added to CPoS and evaluate their impact on the data traffic and on the scheme as a whole.
 
 # Abstract
 
-This repository stores the source code used for collecting the data for the afformentioned article. The file README.md also gives instructions on how to run the simulations and collect the data.
+This repository stores the source code used for collecting the data for the aforementioned article. The file README.md also gives instructions on how to run the simulations and collect the data.
 
 # Running the simulation
 
@@ -32,7 +32,7 @@ $ poetry shell
 
 ## Running local network (minimum test)
 
-As a minimum test, you can run all the network's nodes in the local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0.
+As a minimum test, you can run all the network's nodes in a local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0.
 
 
 You can launch a local network with the command:
@@ -72,10 +72,11 @@ If you want to copy the log files to process and extract some data, fill the fol
 Now, with everything configured, you can start the scheme with the following commands:
 
 ```
-$ docker stack deploy -c docker-compose.yml cpos ; docker service rm cpos_node cpos_node_dishonest ; docker stack deploy -c docker-compose.yml cpos
+$ docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node cpos_node_dishonest
+$ docker stack deploy -c docker-compose.yml cpos
 ```
 
-You have to remove the cpos_node service and then deploy the stack again because the cpos_node / cpos_node_dishonest has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name. There's a possibility the first command will fail if the cpos_test_network is not created by the time cpos_node or cpos_beacon is deployed. If this happens, run the command again. Unfortunately, we cannot guarantee the order of deploy with Docker Swarm.
+You have to remove the cpos_node service and then deploy the stack again because the cpos_node / cpos_node_dishonest has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name. There's a possibility the first command will fail if the cpos_test_network is not created by the time cpos_node or cpos_beacon is deployed. If this happens, run the command again. Unfortunately, we cannot guarantee the order of deploy with Docker Swarm. To make sure the beacon doesn't register any of the nodes from the first deploy, wait at least 6 times the round time before running the second command, so that it empties its list.
 
 If you want to monitor the logs to see what's going on, you can use these commands:
 
