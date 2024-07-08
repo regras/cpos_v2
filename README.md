@@ -109,7 +109,7 @@ In order to run the experiments automatically, you can use the bash script as fo
 $ ./demo/run_experiments.sh
 ```
 
-With the configuration present on the Github version of this script, it will run the same experiments ran for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. It is also important that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. 
+With the configuration present on the Github version of this script, it will run the same experiments as the ones for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. It is also important that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. 
 
 
 After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
