@@ -123,3 +123,17 @@ Then, inside a poetry shell, you can process the data with the following command
 ```
 $ python demo/process_data.py
 ```
+
+# Changing parameters for the executions
+
+It is possible to change some of the parameters used in the execution by modifying the files docker-compose-local.yml, docker-compose.yml or demo/run_experiments.sh depending on the type of execution. A few examples are:
+
+
+- To change the values for the CPoS parameter “tau” used in the experiments, change line 30 of docker-compose-local.yml (for the local network); line 53 of docker-compose.yml (for the non-automatic distributed network); or line 22 of demo/run_experiments.sh (for the automatic distributed network).
+
+
+- To change the values for the duration of a round used in the experiments, change lines 11 and 20 of docker-compose-local.yml (for the local network); lines 20 and 51 of docker-compose.yml (for the non-automatic distributed network); or line 23 of demo/run_experiments.sh (for the automatic distributed network).
+
+
+- To change the number of nodes in the CPoS network, it is also necessary to guarantee that the total stake will be equal to the number of nodes. In order to change these parameters, modify the lines 21 and 31 of docker-compose-local.yml (for the local network); or lines 25 and 54 of docker-compose.yml (for both the automatic and non-automatic distributed networks)
+
