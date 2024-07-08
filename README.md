@@ -124,7 +124,7 @@ Then, inside a poetry shell, you can process the data with the following command
 $ python demo/process_data.py
 ```
 
-# Changing parameters for the executions
+# Examples of changing parameters for the executions
 
 It is possible to change some of the parameters used in the execution by modifying the files docker-compose-local.yml, docker-compose.yml or demo/run_experiments.sh depending on the type of execution. A few examples are:
 
