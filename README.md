@@ -13,6 +13,7 @@ This repository stores the source code used for collecting the data for the afor
 ## Dependencies
 
 - Docker 24.0
+- Python 3.11
 - Docker Compose 2.20
 - Poetry 1.6.1
 
@@ -55,6 +56,11 @@ After the simulation is done, be sure to run the following command to take down 
 ```
 $ docker compose --file docker-compose-local.yml down
 ```
+
+The end of the execution does not take down the docker nodes, therefore it is necessary to run the command presented above.
+
+
+**Note:** It is importante to nore that each node in the network is programmed to run for 30 rounds. However, the round number does not start at 0. It is determined by the number of round times since the date and time 2024-06-01 00:00:00. So the execution will start in a round number x, and run until approximatelly x + 30. The nodes can have small disagreements amongst themselves in what round "x" the execution started, since their internal clocks might not be perfectly synchronized. This applies to all the ways of running the simulation.
 
 ## Running with distributed nodes
 
