@@ -76,6 +76,7 @@ class BlockChain:
         self.fork_detected = False
 
         self.current_round: int = 0
+        self.confirmation_delays = []
         self.update_round()
 
     def update_round(self):
@@ -119,6 +120,7 @@ class BlockChain:
             if successful_avg > conf_thresh:
                 self.logger.info(f"confirmed block {oldest_id}")
                 self.confirm_block(oldest_id)
+                self.confirmation_delays.append([oldest_id, oldest_index, self.current_round - oldest_round]) # measured in rounds
                 self.last_confirmation_delay = self.current_round - last_confirmed_block_round 
 
             fork_thresh = fork_threshold(total_stake=self.parameters.total_stake,
