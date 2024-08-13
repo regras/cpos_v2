@@ -10,6 +10,6 @@ COPY . /cpos
 
 # RUN chown -R root "/cpos"
 
-RUN poetry install
+RUN apt-get update && apt-get install -y default-mysql-server && poetry install
 
-# EXPOSE 8888
+EXPOSE 3306

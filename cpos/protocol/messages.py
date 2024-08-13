@@ -13,6 +13,7 @@ class MessageCode:
     BLOCK_BROADCAST = 0x2
     PEER_LIST_REQUEST = 0x3
     PEER_LIST = 0x4
+    PEER_FORGET_REQUEST = 0x5
 
 class MessageParseError(Exception):
     pass
@@ -42,9 +43,10 @@ class Hello(Message):
         return f"Hello(id={self.peer_id.hex()[0:8]}, port={self.peer_port})"
 
 class BlockBroadcast(Message):
-    def __init__(self, block: Block):
+    def __init__(self, block: Block, peer_id: bytes):
         self.code = MessageCode.BLOCK_BROADCAST
         self.block = block
+        self.peer_id = peer_id
 
     def __str__(self):
         return self.block.__str__()
@@ -57,6 +59,11 @@ class PeerListRequest(Message):
         self.code = MessageCode.PEER_LIST_REQUEST
         self.node_id = node_id
 
+class PeerForgetRequest(Message):
+    def __init__(self, peer_id: bytes):
+        self.peer_id = peer_id
+        self.code = MessageCode.PEER_FORGET_REQUEST
+
 class PeerList(Message):
     def __init__(self, peerlist: list[tuple[str, str | int, bytes]]):
         self.code = MessageCode.PEER_LIST
@@ -64,9 +71,9 @@ class PeerList(Message):
 
 # Ask for the last `block_count` blocks in peer's blockchain view
 class ResyncRequest(Message):
-    def __init__(self, peer_id: bytes, block_count: int):
+    def __init__(self, peer_id: bytes, block_index: int):
         self.peer_id = peer_id
-        self.block_count = block_count
+        self.block_index = block_index
 
     def __str__(self):
         return f"ResyncRequest(peer_id={self.peer_id})"
@@ -75,5 +82,5 @@ class ResyncRequest(Message):
         return self.__str__()
 
 class ResyncResponse(Message):
-    def __init__(self, block_list: list[Block]):
-        self.block_list = block_list
+    def __init__(self, block_received: Block):
+        self.block_received = block_received

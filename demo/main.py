@@ -4,11 +4,13 @@ from time import sleep
 import argparse
 import pickle
 import signal
-
+import threading
+import time
 
 from cpos.node import Node, NodeConfig
-from cpos.protocol.messages import Hello 
-
+from cpos.protocol.messages import Hello
+from demo.populate_mempool import populate_mempool
+from demo.send_data import send_data
 
 def main():
     parser = argparse.ArgumentParser()
@@ -34,9 +36,15 @@ def main():
     signal.signal(signal.SIGINT, sighandler)
     signal.signal(signal.SIGTERM, sighandler)
 
+    # Separate thread for mempool populator
+    thread = threading.Thread(target=populate_mempool)
+    thread.start()
+
     try:
         node.greet_peers()
+        time.sleep(5)
         node.start()
+        send_data()
     except KeyboardInterrupt:
         exit(1)
 

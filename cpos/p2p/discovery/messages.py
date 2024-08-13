@@ -6,6 +6,8 @@ class MessageCode:
     UNIMPLEMENTED = 0xFF,
     HELLO = 0x0,
     PEERLIST = 0x1,
+    PEER_LIST_REQUEST = 0x2,
+    NOTIFY_BEACON = 0x3,
 
 class Message:
     def __init__(self, code):
@@ -39,3 +41,15 @@ class PeerList(Message):
     
     def __repr__(self):
         return self.__str__()
+
+class PeerListRequest(Message):
+    def __init__(self, requester_id: bytes):
+        self.code = MessageCode.PEER_LIST_REQUEST
+        self.requester_id = requester_id
+
+class NotifyBeacon(Message):
+    def __init__(self, port: int, id: bytes, ip: str):
+        self.code = MessageCode.NOTIFY_BEACON
+        self.port = port
+        self.id = id
+        self.ip = ip
