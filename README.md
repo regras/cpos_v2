@@ -51,16 +51,16 @@ After that, you can configure the environment variables on `docker-compose.yml`,
 Now, with everything configured, you can start the scheme with the following commands:
 
 ```
-$ docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node
-$ docker stack deploy -c docker-compose.yml cpos
+$ docker stack deploy -c docker-compose.yml cpos ; docker service rm cpos_node cpos_node_dishonest ; docker stack deploy -c docker-compose.yml cpos
 ```
 
-You have to remove the cpos_node service and then deploy the stack again because the cpos_node has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name. There's a possibility the first command will fail if the cpos_test_network is not created by the time cpos_node or cpos_beacon is deployed. If this happens, run the command again. Unfortunately, we cannot guarantee the order of deploy with Docker Swarm.
+You have to remove the cpos_node service and then deploy the stack again because the cpos_node / cpos_node_dishonest has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name. There's a possibility the first command will fail if the cpos_test_network is not created by the time cpos_node or cpos_beacon is deployed. If this happens, run the command again. Unfortunately, we cannot guarantee the order of deploy with Docker Swarm.
 
 If you want to monitor the logs to see what's going on, you can use these commands:
 
 ```
 $ docker service logs --follow --raw cpos_node
+$ docker service logs --follow --raw cpos_node_dishonest
 $ docker service logs --follow --raw cpos_beacon
 ```
 

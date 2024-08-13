@@ -80,7 +80,7 @@ class Network:
         return msg
     
     def forget_peer(self, peer_id: bytes):
-        self.logger.debug(f"Forgetting peer: {peer_id.hex()[0:8]}")
+        self.logger.info(f"Forgetting peer: {peer_id.hex()[0:8]}")
         try:
             self.known_peers.remove(peer_id)
             del self.peer_failed_msg_count[peer_id]

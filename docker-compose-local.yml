@@ -7,8 +7,10 @@ services:
       - .:/cpos
     environment:
       - PORT=9000
-      - NUM_PEERS_SEND=5           # number of peers sent by beacon to nodes who just entered or need more 
+      - NUM_PEERS_SEND=5           # number of peers sent by beacon to nodes who just entered or need more
+      - ROUND_TIME=20
     command: /bin/bash demo/run_beacon.sh
+
   node:
     # image: georgejuniorg/cpos_v2
     build: .
@@ -16,7 +18,7 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: 6
+      replicas: 5
     volumes:
       - .:/cpos
     environment:
@@ -28,9 +30,41 @@ services:
       - TAU=3
       - TOTAL_STAKE=6
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
-      - MAXIMUM_NUM_PEERS=8          # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=4          # minimum number of peers a node can have
-      - PERCENTAGE_DISHONEST=0           # 
+      - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
+      - BROADCAST_CREATED_BLOCK=true     
+      - BROADCAST_RECEIVED_BLOCK=true
+
+      # Be careful not to commit the following information to github
+      - SSH_ADDRESS=
+      - SSH_PASSWORD=
+      - SCP_PATH=
+
+    command: /bin/bash demo/run_node.sh
+
+  node_dishonest:
+    # image: georgejuniorg/cpos_v2
+    build: .
+    tty: true
+    depends_on:
+      - beacon
+    deploy:
+      replicas: 1
+    volumes:
+      - .:/cpos
+    environment:
+      - BEACON_IP=beacon
+      - BEACON_PORT=9000
+      - PORT=8888
+      - ROUND_TIME=20
+      - TOLERANCE=2
+      - TAU=3
+      - TOTAL_STAKE=6
+      - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
+      - MAXIMUM_NUM_PEERS=8              # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=4              # minimum number of peers a node can have
+      - BROADCAST_CREATED_BLOCK=false
+      - BROADCAST_RECEIVED_BLOCK=false
 
       # Be careful not to commit the following information to github
       - SSH_ADDRESS=

@@ -23,15 +23,15 @@ def sighandler(*args):
 class RandomTransactionGenerator:
     def __init__(self) -> None:
         self.transaction_id = 0
-        self.input_address = self.generate_random_string(256)
-        self.output_address = self.generate_random_string(256)
+        self.input_address = self.generate_random_string(32)
+        self.output_address = self.generate_random_string(32)
         self.committed = 0
         self.chosen = 0
 
     def generate_random_transactions(self) -> tuple:
         value = np.random.normal(100,20)
         timestamp = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-        data = self.generate_random_string(int(np.random.normal(800, 200)))
+        data = self.generate_random_string(int(np.random.normal(100, 20)))
 
         transaction_hash = self.generate_hash(
             str(self.transaction_id) +
@@ -62,8 +62,10 @@ class RandomTransactionGenerator:
 
     def generate_hash(self, data:str) -> str:
         sha = hashlib.sha256()
-        sha.update(base64.b64encode(data.encode('utf-8')))
-        return sha.hexdigest()
+        sha.update(base64.b64encode(data.encode('ASCII')))
+        hash_bytes = sha.digest()
+        hash_string = base64.b64encode(hash_bytes).decode('ASCII')
+        return hash_string
     
     def generate_random_string(self, length:int) -> str:
         random_string = ""
@@ -71,7 +73,7 @@ class RandomTransactionGenerator:
             random_bytes = os.urandom(32)
             random_string += hashlib.sha256(random_bytes).hexdigest()
         return random_string[:length]
-
+    
 def populate_mempool() -> None:
     try:
         connection = mysql.connector.connect(
@@ -100,6 +102,8 @@ def populate_mempool() -> None:
         if 'connection' in locals():
             connection.close()
             print("Connection closed!")
+
+
 
 if __name__ == "__main__":
     populate_mempool()
