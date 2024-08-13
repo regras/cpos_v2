@@ -35,7 +35,18 @@ $ poetry shell
 
 ## Running local network (minimum test)
 
-As a minimum test, you can run all the network's nodes in a local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0.
+As a minimum test, you can run all the network's nodes in a local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0. The version of the file available already contains a default set of parameters for a demo run, but you can change it accordingly if you desire. Below is an example of some parameters you can customize through Docker Compose's environment variables:
+
+```
+environment:
+      - BEACON_IP=beacon
+      - BEACON_PORT=9000
+      - PORT=8888
+      - ROUND_TIME=20
+      - TOLERANCE=2
+      - TAU=3
+      - TOTAL_STAKE=5
+```
 
 You can launch a local network with the command:
 
@@ -63,7 +74,7 @@ The execution of the program beeing halted does not take down the docker node, t
 
 To run with distributed nodes, you should have a [Docker Swarm set up](https://docs.docker.com/engine/swarm/swarm-tutorial/) with only one Manager. Be sure to have the specified ports open on every node.
 
-After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. For this article, the number of replicas of node_dishonest was kept at 0.
+After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. For this article, the number of replicas of node_dishonest was kept at 0. The version of the file available already contains a default set of parameters for a demo run, but you can change it accordingly if you desire.
 
 If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
 
