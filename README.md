@@ -17,6 +17,8 @@ This repository stores the source code used for collecting the data for the afor
 - Docker Compose 2.20
 - Poetry 1.6.1
 
+We recommend running the process_data.py script on Linux Ubuntu 20.04.
+
 ## Building
 
 After cloning the repository, go to the repository directory and install the project with:
@@ -35,7 +37,6 @@ $ poetry shell
 
 As a minimum test, you can run all the network's nodes in a local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0.
 
-
 You can launch a local network with the command:
 
 ```
@@ -48,9 +49,6 @@ It will stop running when it gets to round 30. To process the generated data, ru
 $ python demo/process_data.py
 ```
 
-This will also generate a bunch of images inside `demo/logs`. 
-
-
 After the simulation is done, be sure to run the following command to take down the docker nodes (specially before running another simulation).
 
 ```
@@ -59,15 +57,13 @@ $ docker compose --file docker-compose-local.yml down
 
 The execution of the program beeing halted does not take down the docker node, therefore it is necessary to run the command presented above after all the nodes have halted.
 
-
 **Note:** It is importante to note that each node in the network is programmed to run for 30 rounds. However, the round number does not start at 0. It is determined by the number of round times since the date and time 2024-06-01 00:00:00. So the execution will start in a round number x, and run until approximatelly x + 30. The nodes can have small disagreements amongst themselves in what round "x" the execution started, since their internal clocks might not be perfectly synchronized. This applies to all the ways of running the simulation.
 
 ## Running with distributed nodes
 
 To run with distributed nodes, you should have a [Docker Swarm set up](https://docs.docker.com/engine/swarm/swarm-tutorial/) with only one Manager. Be sure to have the specified ports open on every node.
 
-After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. For this article, the number of replicas of node_dishonest was kept at 0. 
-
+After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. For this article, the number of replicas of node_dishonest was kept at 0.
 
 If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
 
@@ -94,7 +90,6 @@ $ docker service logs --follow --raw cpos_beacon
 
 The first one refers to the node, and the second one to the beacon. You can press CTRL + C to exit the logs.
 
-
 After all the data has been collected and the resulting .data files have been moved into the folder demo/logs you can process the data by running this command inside a poetry shell:
 
 ```
@@ -115,8 +110,7 @@ In order to run the experiments automatically, you can use the bash script as fo
 $ ./demo/run_experiments.sh
 ```
 
-With the configuration present on the Github version of this script, it will run the same experiments as the ones for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. It is also important that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. 
-
+With the configuration present on the Github version of this script, it will run the same experiments as the ones for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. It is also important that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network.
 
 After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
 
@@ -134,12 +128,6 @@ $ python demo/process_data.py
 
 It is possible to change some of the parameters used in the execution by modifying the files docker-compose-local.yml, docker-compose.yml or demo/run_experiments.sh depending on the type of execution. A few examples are:
 
-
 - To change the values for the CPoS parameter “tau” used in the experiments, change line 30 of docker-compose-local.yml (for the local network); line 53 of docker-compose.yml (for the non-automatic distributed network); or line 22 of demo/run_experiments.sh (for the automatic distributed network).
-
-
 - To change the values for the duration of a round used in the experiments, change lines 11 and 20 of docker-compose-local.yml (for the local network); lines 20 and 51 of docker-compose.yml (for the non-automatic distributed network); or line 23 of demo/run_experiments.sh (for the automatic distributed network).
-
-
 - To change the number of nodes in the CPoS network, it is also necessary to guarantee that the total stake will be equal to the number of nodes. In order to change these parameters, modify the lines 21 and 31 of docker-compose-local.yml (for the local network); or lines 25 and 54 of docker-compose.yml (for both the automatic and non-automatic distributed networks)
-

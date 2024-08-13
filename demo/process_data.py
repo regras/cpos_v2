@@ -1,7 +1,6 @@
 import os
 from os.path import join
 import pickle
-import graphviz
 
 import os
 
@@ -48,8 +47,6 @@ def main():
 
 def plot_bc(bc, last_confirmed_block_info, filename: str, blockchain_info: list):
     block_count = 0
-    dot = graphviz.Graph(filename)
-    dot.format = "png"
     last_confirmed_block_index, last_confirmed_block_id, last_confirmed_block_round = last_confirmed_block_info
     round_time, last_confirmation_delay, current_round = blockchain_info
     confirmed_blocks = 0
@@ -59,17 +56,11 @@ def plot_bc(bc, last_confirmed_block_info, filename: str, blockchain_info: list)
         if block.hash == last_confirmed_block_id:
             confirmed_blocks = block_count
             print("=== [UNCONFIRMED BLOCKS] ===")
-        dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> <TR> <TD> owner: [{block.owner_pubkey.hex()[0:8]}] </TD> </TR> </TABLE>>")
 
     # confirmed blocks per minute
     throughput = last_confirmed_block_index * 60 / (round_time * current_round)
     # block confirmation time
     confirmation_delay = last_confirmation_delay * round_time
-
-    for i in range(0, len(bc) - 1):
-        dot.edge(f"{i}", f"{i+1}")
-
-    dot.render(directory="demo/logs")
 
     return throughput, confirmation_delay, len(bc), confirmed_blocks
 
