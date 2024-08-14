@@ -52,10 +52,10 @@ class BlockChainParameters:
 
 class BlockChain:
 
-    def __init__(self, parameters: BlockChainParameters, genesis: Optional[GenesisBlock] = None):
+    def __init__(self, parameters: BlockChainParameters, genesis: Optional[GenesisBlock] = None, node_id: bytes = None):
         logger = logging.getLogger(__name__)
         handler = logging.StreamHandler()
-        formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: %(message)s")
+        formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: [{node_id.hex()[0:8]}] %(message)s")
         logger.setLevel(logging.INFO)
         handler.setFormatter(formatter)
         logger.addHandler(handler)

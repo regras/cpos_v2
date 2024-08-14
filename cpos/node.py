@@ -90,7 +90,7 @@ class Node:
         total_stake = int(os.getenv("TOTAL_STAKE", 25))
 
         params = BlockChainParameters(round_time=round_time, tolerance=tolerance, tau=tau, total_stake=total_stake)
-        self.bc: BlockChain = BlockChain(params, genesis=genesis)
+        self.bc: BlockChain = BlockChain(params, genesis=genesis, node_id=self.id)
         self.state = State.LISTENING
         self.missed_blocks: list[tuple[Block, bytes]] = []
         self.received_resync_blocks: list[Block] = []
@@ -254,6 +254,7 @@ class Node:
                 # don't log every single round...)
                 self.dump_data("demo/logs")
                 round = self.bc.current_round
+                self.logger.info(f"PEERLIST: size: {len(self.network.known_peers)},   {sorted([i.hex()[0:8] for i in self.network.known_peers])}") # DELETE
                 new_block = self.generate_block()
                 if new_block is not None and self.broadcast_created_block: # if dishonest node isnt going to broadcast block, it is also not going to insert in local blockchain
                     self.bc.insert(new_block)
@@ -338,7 +339,7 @@ class Node:
 
     def start(self):
         self.should_halt = False
-        self.logger.debug(f"peerlist: {self.network.known_peers}")
+        self.logger.debug(f"peerlist: {sorted([i.hex()[0:8] for i in self.network.known_peers])}")
         self.greet_peers()
         self.loop()
 

@@ -15,7 +15,7 @@ class Beacon:
         logger = logging.getLogger(__name__)
         handler = logging.StreamHandler()
         formatter = logging.Formatter(f"[%(asctime)s][%(levelname)s] {__name__}: %(message)s")
-        logger.setLevel(logging.DEBUG)
+        logger.setLevel(logging.INFO)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
         self.logger = logger
