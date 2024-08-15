@@ -57,14 +57,17 @@ class Network:
                 self.logger.debug(f"sending message to peer {peer_id.hex()[0:8]}")
                 self.socket.send_multipart([peer_id, bytes(), msg], zmq.NOBLOCK)
                 self.peer_failed_msg_count[peer_id] = 0
+                return True
             except Exception as e:
                 self.peer_failed_msg_count[peer_id] += 1 
                 self.logger.error(f"failed to send message to peer {peer_id.hex()[0:8]}, failure number: {self.peer_failed_msg_count[peer_id]}, ({e})")
                 self.logger.error(f"known_peers: {self.known_peers}")
                 if self.peer_failed_msg_count[peer_id] >= 3:
                     self.forget_peer(peer_id)
+                return False
         else:
             self.logger.error(f"failed to send message to unknown peer: {peer_id.hex()}")
+            return False
 
     def read(self, timeout=0) -> Optional[bytes]:
         # self.logger.debug(f"trying to read socket (timeout={timeout})")
