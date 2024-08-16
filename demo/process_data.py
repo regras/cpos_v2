@@ -58,7 +58,7 @@ def plot_bc(bc, last_confirmed_block_info, filename: str, blockchain_info: list)
             print("=== [UNCONFIRMED BLOCKS] ===")
 
     # confirmed blocks per minute
-    throughput = last_confirmed_block_index * 60 / (round_time * current_round)
+    throughput = last_confirmed_block_index * 60 / (round_time * 30)
     # block confirmation time
     confirmation_delay = last_confirmation_delay * round_time
 
