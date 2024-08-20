@@ -4,6 +4,9 @@ from cpos.core.blockchain import BlockChain, BlockChainParameters
 from cpos.core.transactions import TransactionList
 from typing import Optional
 
+# NOT ADAPTED TO CURRENT CODE
+# The blockchain atribute "blocks" was substituted by the blockchain database
+
 # TODO: maybe split these into smaller tests
 def test_basic_insertion():
     params = BlockChainParameters(round_time = 15.0,

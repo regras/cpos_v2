@@ -1,18 +1,23 @@
 import os
 from os.path import join
 import pickle
-import graphviz
 
-from cpos.core.blockchain import BlockChain
+import os
+
+
+# NOT ADAPTED TO CURRENT CODE
+# The blockchain atribute "blocks" was substituted by the blockchain database
 
 def main():
     cwd = os.getcwd()
-    log_dir = join(cwd, "demo/logs")
+    log_dir = join(cwd, "demo/logs/")
 
     avg_throughput = 0
     avg_confirmation_delay = 0
     total_message_count = 0
     total_message_bytes = 0
+    total_blocks = 0
+    total_confirmed_blocks = 0
     total = 0
 
     for filename in os.listdir(log_dir):
@@ -22,12 +27,14 @@ def main():
         # plot local blockchain views and update statistics
         print(f"processing {filename}")
         with open(join(log_dir, filename), "rb") as file:
-            bc, message_count, message_bytes = pickle.load(file)
-            throughput, confirmation_delay = plot_bc(bc, filename)
+            bc, last_confirmed_block_info, message_count, message_bytes, blockchain_info = pickle.load(file)
+            throughput, confirmation_delay, block_count, confirmed_blocks = plot_bc(bc, last_confirmed_block_info, filename, blockchain_info)
             avg_throughput += throughput
             avg_confirmation_delay += confirmation_delay
             total_message_count += message_count
             total_message_bytes += message_bytes
+            total_blocks += block_count
+            total_confirmed_blocks += confirmed_blocks
             total += 1
         print(f"-------------------------------------\n")
 
@@ -36,27 +43,26 @@ def main():
 
     print(f"statistics: average throughput = {avg_throughput} blocks/min; average confirmation delay = {avg_confirmation_delay}s")
     print(f"total messages: {total_message_count} ({total_message_bytes / (1024 * 1024)} MiB)")
+    print(f"total blocks = {total_blocks}; total confirmed blocks = {total_confirmed_blocks}")
 
-def plot_bc(bc: BlockChain, filename: str):
-    dot = graphviz.Graph(filename)
-    dot.format = "png"
-    for block in bc.blocks:
+def plot_bc(bc, last_confirmed_block_info, filename: str, blockchain_info: list):
+    block_count = 0
+    last_confirmed_block_index, last_confirmed_block_id, last_confirmed_block_round = last_confirmed_block_info
+    round_time, last_confirmation_delay, current_round = blockchain_info
+    confirmed_blocks = 0
+    for block in bc:
         print(block)
-        if block == bc.last_confirmed_block:
+        block_count += 1
+        if block.hash == last_confirmed_block_id:
+            confirmed_blocks = block_count
             print("=== [UNCONFIRMED BLOCKS] ===")
-        dot.node(f"{block.index}", label=f"<<TABLE> <TR> <TD> hash: {block.hash.hex()[0:8]} </TD> </TR>  <TR> <TD> parent: {block.parent_hash.hex()[0:8]} </TD> </TR> <TR> <TD> owner: [{block.owner_pubkey.hex()[0:8]}] </TD> </TR> </TABLE>>")
 
     # confirmed blocks per minute
-    throughput = bc.last_confirmed_block.index * 60 / (bc.parameters.round_time * bc.current_round)
+    throughput = last_confirmed_block_index * 60 / (round_time * 30)
     # block confirmation time
-    confirmation_delay = bc.last_confirmation_delay * bc.parameters.round_time
+    confirmation_delay = last_confirmation_delay * round_time
 
-    for i in range(0, len(bc.blocks) - 1):
-        dot.edge(f"{i}", f"{i+1}")
-
-    dot.render(directory="demo/logs")
-
-    return throughput, confirmation_delay 
+    return throughput, confirmation_delay, len(bc), confirmed_blocks
 
 if __name__ == "__main__":
     main()

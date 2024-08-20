@@ -65,19 +65,22 @@ def confirmation_threshold(total_stake: int, tau: int, delta_r: int, threshold: 
             s += 1
     return s
 
-# this is unclear in Diego's dissertation; the following is my best guess
 def fork_threshold(total_stake: int, tau: int, delta_r: int, threshold: float = 0.95):
-    a = 1
+    a = tau
     p = tau / total_stake
     while True:
-        k = min((tau + a) * delta_r - 1, total_stake)
-        chance = cumulative_binom_dist(total_stake, k, p)
-        print(f"chance: {chance}")
+        # We want to be 95% sure that the average number of successful draws is >= a
+        # a * delta_r => we expect a * delta_r successful draws in W * delta_r draws => average of a draws per round
+        # Probability of having at least a * delta_r successful draws in total_stake * delta_r draws
+        # Pr(successful draws >= a * delta_r) = 1 - Pr(successful draws < a * delta_r - 1)
+        k = min((a) * delta_r - 1, total_stake * delta_r)
+        chance = 1 - cumulative_binom_dist(total_stake * delta_r, k, p)
+        # print(f"chance: {chance}")
         
         if chance >= threshold:
             break
         else:
-            a += 1
+            a -= 1
     return a
 
 def main():
