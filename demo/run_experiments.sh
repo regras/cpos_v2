@@ -47,7 +47,7 @@ for TAU in "${TAU_VALUES[@]}"; do
                 # Wait for all containers to exit
                 echo "Waiting for containers to finish..."
                 # Calculate and wait for the specified time
-                sleep_time=$(calculate_sleep_time "$ROUND_TIME")
+                sleep_time=$(calculate_sleep_time "$ROUND_TIME") # CHANGE THIS TO APPROPRIATE NUMBER OF ROUNDS BEFORE EXECUTION
                 sleep "$sleep_time"
 
                 # After all containers have finished, bring down services

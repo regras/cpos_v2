@@ -108,7 +108,7 @@ class Node:
         try:
             with open(filepath, "wb") as file:
                 blockchain_info = [self.bc.parameters.round_time, self.bc.last_confirmation_delay, self.bc.current_round]
-                data = pickle.dumps((self.bc.last_n_blocks(self.bc.number_of_blocks()), self.bc.last_confirmed_block_info(), self.message_count, self.total_message_bytes, blockchain_info))
+                data = pickle.dumps((self.bc.last_n_blocks(self.bc.number_of_blocks()), self.bc.last_confirmed_block_info(), self.bc.confirmation_delays, self.message_count, self.total_message_bytes, blockchain_info))
                 file.write(data)
                 file.flush()
                 file.close()
