@@ -39,7 +39,7 @@ for TAU in "${TAU_VALUES[@]}"; do
                 export SCP_PATH="~/logs/${NUM_PEER}peers/${TAU}_${ROUND_TIME}_${i}"
 
                 # Bring up services in detached mode
-                docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node
+                docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node cpos_node_dishonest
                 sleep_duration=$((ROUND_TIME * 7))
                 sleep $sleep_duration
                 docker stack deploy -c docker-compose.yml cpos
