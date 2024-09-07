@@ -104,7 +104,7 @@ class BlockChain:
             return
 
         oldest_index, oldest_id, oldest_numSuc, oldest_round = self.oldest_unconfirmed_block()
-        delta_r = round - oldest_round
+        delta_r = round - oldest_round - 1
 
         if delta_r > 0 and oldest_index > 0:
             successful_avg = oldest_numSuc / delta_r

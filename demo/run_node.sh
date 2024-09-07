@@ -14,7 +14,7 @@ mysql localBlockchain < cpos/db/localBlockchain.sql
 # CPoS related commands
 export GENESIS_TIMESTAMP=$(date -d '2024-06-01 00:00:00' +%s)
 echo "GENESIS_TIMESTAMP: $GENESIS_TIMESTAMP"
-poetry run python demo/main.py --beacon-ip $BEACON_IP --beacon-port $BEACON_PORT -p $PORT --genesis-timestamp $GENESIS_TIMESTAMP --total-rounds 30 &
+poetry run python demo/main.py --beacon-ip $BEACON_IP --beacon-port $BEACON_PORT -p $PORT --genesis-timestamp $GENESIS_TIMESTAMP --total-rounds 40 &
 pid=$!
 
 # trap "send_data" INT TERM
