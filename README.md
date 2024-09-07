@@ -99,7 +99,7 @@ $ docker service logs --follow --raw cpos_node_dishonest
 $ docker service logs --follow --raw cpos_beacon
 ```
 
-The first one refers to the node, and the second one to the beacon. You can press CTRL + C to exit the logs.
+The first and second ones refers to the nodes, and the third one to the beacon. You can press CTRL + C to exit the logs.
 
 After all the data has been collected and the resulting .data files have been moved into the folder demo/logs you can process the data by running this command inside a poetry shell:
 
