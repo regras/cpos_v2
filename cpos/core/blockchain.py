@@ -201,6 +201,7 @@ class BlockChain:
 
         if self.block_in_blockchain(block):
             self._log_failed_insertion(block, "already in local chain")
+            return False
 
         if block.index == 0:
             self._log_failed_insertion(block, "new genesis block")
