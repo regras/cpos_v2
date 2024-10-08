@@ -27,7 +27,7 @@ def main():
         # plot local blockchain views and update statistics
         print(f"processing {filename}")
         with open(join(log_dir, filename), "rb") as file:
-            bc, last_confirmed_block_info, confirmation_delays, message_count, message_bytes, blockchain_info = pickle.load(file)
+            bc, last_confirmed_block_info, confirmation_delays, message_count, message_bytes, blockchain_info, debug_info = pickle.load(file)
             throughput, block_count, confirmed_blocks = plot_bc(bc, last_confirmed_block_info, filename, blockchain_info)
             avg_throughput += throughput
             total_message_count += message_count
