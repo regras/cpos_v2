@@ -205,15 +205,14 @@ class Node:
             return False
         self.logger.info(f"trying to insert {block}")
         self.received_blocks += 1
-        if not self.bc.insert(block):
-            if not self.bc.block_in_blockchain(block):
-                self.missed_blocks.append((block, peer_id))
-            #if block not in self.bc:
-            #    self.missed_blocks.append((block, peer_id))
-        else:
+        block_in_blockchain = self.bc.block_in_blockchain(block)
+        if not (block_in_blockchain or block in self.missed_blocks):
             own_id = self.id if not None else self.config.id
             if self.broadcast_received_block:
                 self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
+        if not self.bc.insert(block):
+            if not block_in_blockchain:
+                self.missed_blocks.append((block, peer_id))
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 

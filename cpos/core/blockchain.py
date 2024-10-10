@@ -194,7 +194,7 @@ class BlockChain:
         connection.commit()
         cursor.close()
 
-        return True
+        return True 
     
     # try to insert a block at the end of the chain
     def insert(self, block: Block) -> bool:
