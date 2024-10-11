@@ -206,7 +206,8 @@ class Node:
         self.logger.info(f"trying to insert {block}")
         self.received_blocks += 1
         block_in_blockchain = self.bc.block_in_blockchain(block)
-        if not (block_in_blockchain or block in self.missed_blocks):
+        block_in_missed_blocks = any(tup[0] == block for tup in self.missed_blocks)
+        if not (block_in_blockchain or block_in_missed_blocks):
             own_id = self.id if not None else self.config.id
             if self.broadcast_received_block:
                 self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
