@@ -206,13 +206,16 @@ class Node:
         self.logger.info(f"trying to insert {block}")
         self.received_blocks += 1
         block_in_blockchain = self.bc.block_in_blockchain(block)
-        block_in_missed_blocks = any(tup[0] == block for tup in self.missed_blocks)
+        block_in_missed_blocks = any(tup[0].hash.hex() == block.hash.hex() for tup in self.missed_blocks)
         if not (block_in_blockchain or block_in_missed_blocks):
             own_id = self.id if not None else self.config.id
             if self.broadcast_received_block:
                 self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
+                # TODO: Blocks are retransmitted and stored without even checking if they are valid. This is ok in a simulation, but unsafe for real use.
         if not self.bc.insert(block):
             if not block_in_blockchain:
+                # TODO: missed_blocks grows infinetly for every block received from a peer. After a suficient number of rounds, it will grow too big.
+                # It would be reosonable to have a limit to its size and start deleting old blocks, and maybe store peer_id and block seperatelly and without repetition
                 self.missed_blocks.append((block, peer_id))
 
     def control_number_of_peers(self):
