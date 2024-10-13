@@ -5,9 +5,6 @@ import pickle
 import os
 
 
-# NOT ADAPTED TO CURRENT CODE
-# The blockchain atribute "blocks" was substituted by the blockchain database
-
 def main():
     cwd = os.getcwd()
     log_dir = join(cwd, "demo/logs/")
