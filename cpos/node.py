@@ -212,11 +212,11 @@ class Node:
             if self.broadcast_received_block:
                 self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
                 # TODO: Blocks are retransmitted and stored without even checking if they are valid. This is ok in a simulation, but unsafe for real use.
-        if not self.bc.insert(block):
-            if not block_in_blockchain:
-                # TODO: missed_blocks grows infinetly for every block received from a peer. After a suficient number of rounds, it will grow too big.
-                # It would be reosonable to have a limit to its size and start deleting old blocks, and maybe store peer_id and block seperatelly and without repetition
-                self.missed_blocks.append((block, peer_id))
+            if not self.bc.insert(block):
+                if not block_in_blockchain:
+                    # TODO: missed_blocks grows infinetly for every block received from a peer. After a suficient number of rounds, it will grow too big.
+                    # It would be reosonable to have a limit to its size and start deleting old blocks, and maybe store peer_id and block seperatelly and without repetition
+                    self.missed_blocks.append((block, peer_id))
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 
