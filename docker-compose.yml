@@ -1,6 +1,7 @@
 services:
   beacon:
-    image: filipefranco/cpos_v2
+    # image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
     build: .
     tty: true
     deploy:
@@ -21,7 +22,8 @@ services:
     command: /bin/bash demo/run_beacon.sh
 
   node:
-    image: filipefranco/cpos_v2
+    # image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
     build: .
     tty: true
     depends_on:
@@ -66,7 +68,8 @@ services:
     command: /bin/bash demo/run_node.sh
 
   node_dishonest:
-    image: filipefranco/cpos_v2
+    # image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
     build: .
     tty: true
     depends_on:
