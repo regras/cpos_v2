@@ -74,8 +74,10 @@ class BlockChain:
         # better naming later
         self.last_confirmation_delay: int = 0
         self.fork_detected = False
+        self.forks_detected = 0 
 
         self.current_round: int = 0
+        self.confirmation_delays = []
         self.update_round()
 
     def update_round(self):
@@ -101,33 +103,45 @@ class BlockChain:
 
         if last_confirmed_block_id == self.last_block_id(): 
             return
+        
+        block_confirmed = True
 
-        oldest_index, oldest_id, oldest_numSuc, oldest_round = self.oldest_unconfirmed_block()
-        delta_r = round - oldest_round
+        while block_confirmed:
+            oldest_index, oldest_id, oldest_numSuc, oldest_round = self.oldest_unconfirmed_block()
+            delta_r = round - oldest_round - 1
+
+            if delta_r > 0 and oldest_index > 0:
+                successful_avg = oldest_numSuc / delta_r
+                self.logger.info(f"oldest unconfirmed block: {oldest_id}, delta_r: {delta_r}, s: {successful_avg}")
+
+                # TODO: make the epsilon threshold variable
+                conf_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
+                                    tau=self.parameters.tau,
+                                    delta_r=delta_r,
+                                    threshold=1e-6)
+                self.logger.info(f"s_min: {conf_thresh}")
+
+                if successful_avg > conf_thresh:
+                    self.logger.info(f"confirmed block {oldest_id}")
+                    self.confirm_block(oldest_id)
+                    self.confirmation_delays.append([oldest_id, oldest_index, self.current_round - oldest_round]) # measured in rounds
+                    self.last_confirmation_delay = self.current_round - last_confirmed_block_round
+                
+                else:
+                    block_confirmed = False
+
+            else:
+                block_confirmed = False
 
         if delta_r > 0 and oldest_index > 0:
-            successful_avg = oldest_numSuc / delta_r
-            self.logger.info(f"oldest unconfirmed block: {oldest_id}, delta_r: {delta_r}, s: {successful_avg}")
-
-            # TODO: make the epsilon threshold variable
-            conf_thresh = confirmation_threshold(total_stake=self.parameters.total_stake,
-                                   tau=self.parameters.tau,
-                                   delta_r=delta_r,
-                                   threshold=1e-6)
-            self.logger.info(f"s_min: {conf_thresh}")
-
-            if successful_avg > conf_thresh:
-                self.logger.info(f"confirmed block {oldest_id}")
-                self.confirm_block(oldest_id)
-                self.last_confirmation_delay = self.current_round - last_confirmed_block_round 
-
             fork_thresh = fork_threshold(total_stake=self.parameters.total_stake,
-                                   tau=self.parameters.tau,
-                                   delta_r=delta_r,
-                                   threshold=0.95)
+                                    tau=self.parameters.tau,
+                                    delta_r=delta_r,
+                                    threshold=0.95)
 
             if successful_avg < fork_thresh:
                 self.fork_detected = True
+                self.forks_detected += 1
                 self.logger.info(f"fork detected!")
 
     def _log_failed_verification(self, block: Block, reason: str):
@@ -180,13 +194,14 @@ class BlockChain:
         connection.commit()
         cursor.close()
 
-        return True
+        return True 
     
     # try to insert a block at the end of the chain
     def insert(self, block: Block) -> bool:
 
         if self.block_in_blockchain(block):
             self._log_failed_insertion(block, "already in local chain")
+            return False
 
         if block.index == 0:
             self._log_failed_insertion(block, "new genesis block")

@@ -153,7 +153,7 @@ class Beacon:
                 self.peers_still_alive_flags[peer.id] = 0
                 new_peerlist.append(peer)
         self.peers = new_peerlist
-        self.logger.debug(f"Current known peers: {self.peers}")
+        self.logger.info(f"Current known peers: {self.peers}")
 
     def update_round(self):
         current_time = time()
