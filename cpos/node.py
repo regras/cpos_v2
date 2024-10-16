@@ -89,6 +89,7 @@ class Node:
         tau = int(os.getenv("TAU", 10))
         total_stake = int(os.getenv("TOTAL_STAKE", 25))
 
+        self.logger.info("PARAMETERS:    " + f" STAKE: {total_stake}      TAU: {tau}     RT:{round_time}     MIN_PEER: {self.minimum_num_peers}     MAX_PEER:{self.maximum_num_peers}    CREATED: {self.broadcast_created_block}     RECEIVED: {self.broadcast_received_block}")
         params = BlockChainParameters(round_time=round_time, tolerance=tolerance, tau=tau, total_stake=total_stake)
         self.bc: BlockChain = BlockChain(params, genesis=genesis, node_id=self.id)
         self.state = State.LISTENING
@@ -212,11 +213,11 @@ class Node:
             if self.broadcast_received_block:
                 self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
                 # TODO: Blocks are retransmitted and stored without even checking if they are valid. This is ok in a simulation, but unsafe for real use.
-            if not self.bc.insert(block):
-                if not block_in_blockchain:
-                    # TODO: missed_blocks grows infinetly for every block received from a peer. After a suficient number of rounds, it will grow too big.
-                    # It would be reosonable to have a limit to its size and start deleting old blocks, and maybe store peer_id and block seperatelly and without repetition
-                    self.missed_blocks.append((block, peer_id))
+        if not self.bc.insert(block):
+            if not block_in_blockchain:
+                # TODO: missed_blocks grows infinetly for every block received from a peer. After a suficient number of rounds, it will grow too big.
+                # It would be reosonable to have a limit to its size and start deleting old blocks, and maybe store peer_id and block seperatelly and without repetition
+                self.missed_blocks.append((block, peer_id))
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 
