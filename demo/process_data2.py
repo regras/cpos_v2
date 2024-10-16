@@ -27,13 +27,7 @@ def main():
         # plot local blockchain views and update statistics
         #print(f"processing {filename}")
         with open(join(log_dir, filename), "rb") as file:
-            has_debug_info = False
-            a = pickle.load(file)
-            if len(a) == 7:
-                has_debug_info = True
-                bc, last_confirmed_block_info, ini_confirmation_delays, message_count, message_bytes, blockchain_info, debug_info = a
-            else:
-                bc, last_confirmed_block_info, ini_confirmation_delays, message_count, message_bytes, blockchain_info = a
+            bc, last_confirmed_block_info, ini_confirmation_delays, message_count, message_bytes, blockchain_info, debug_info = pickle.load(file)
             confirmation_delays = select_valid_confirmation_delays(bc, ini_confirmation_delays)
             throughput, block_count, confirmed_blocks = plot_bc(bc, last_confirmed_block_info, filename, blockchain_info, confirmation_delays)
             avg_throughput += throughput
@@ -43,11 +37,10 @@ def main():
             total_confirmed_blocks += confirmed_blocks
             total += 1
             # block_delay has a format: [block_id, block_index, confirmation_delay (in rounds)]
-            for block_delay in ini_confirmation_delays:
+            for block_delay in confirmation_delays:
                 all_confirmation_delays.append(block_delay[2])
 
-        if has_debug_info:
-            print(f"Produced blocks: {debug_info[0]},   Received Blocks: {debug_info[1]},   Forks Detected: {debug_info[2]},    Resyncs: {debug_info[3]},    Successfull Resyncs: {debug_info[4]}, Known Peers: {len(debug_info[5])}")
+        print(f"Produced blocks: {debug_info[0]},   Received Blocks: {debug_info[1]},   Forks Detected: {debug_info[2]},    Resyncs: {debug_info[3]},    Successfull Resyncs: {debug_info[4]}, Known Peers: {len(debug_info[5])}")
         print(f"Overturns: {len(ini_confirmation_delays) - len(confirmation_delays)}")
         print(f"-------------------------------------\n")
 
