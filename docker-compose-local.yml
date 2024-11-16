@@ -27,6 +27,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - NUMBER_OF_ROUNDS=30
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
@@ -59,6 +60,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - NUMBER_OF_ROUNDS=30
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3

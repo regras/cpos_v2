@@ -1,7 +1,7 @@
 services:
   beacon:
-    # image: georgejuniorg/cpos_v2
-    image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     deploy:
@@ -22,8 +22,8 @@ services:
     command: /bin/bash demo/run_beacon.sh
 
   node:
-    # image: georgejuniorg/cpos_v2
-    image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     depends_on:
@@ -50,6 +50,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - NUMBER_OF_ROUNDS=30
       - ROUND_TIME=${ROUND_TIME:-10}
       - TOLERANCE=2
       - TAU=${TAU:-3}
@@ -68,8 +69,8 @@ services:
     command: /bin/bash demo/run_node.sh
 
   node_dishonest:
-    # image: georgejuniorg/cpos_v2
-    image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     depends_on:
@@ -96,6 +97,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - NUMBER_OF_ROUNDS=30
       - ROUND_TIME=${ROUND_TIME:-10}
       - TOLERANCE=2
       - TAU=${TAU:-3}
