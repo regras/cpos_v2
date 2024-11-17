@@ -1,14 +1,14 @@
 # CPoS v.2 - A refactored and improved implementation of Commiteeless Proof-of-Stake consensus algorithm
 
-Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better-known Proof-of-Work and Proof-of-Stake, with its reduced power consumption and more straightforward design without validation committees. 
+Blockchain technology offers a robust framework for decentralized data storage and processing. Among its various consensus algorithms, Committeeless Proof-of-Stake (CPoS) emerges as a promising alternative to the well-known Proof-of-Work and Proof-of-Stake mechanisms. CPoS distinguishes itself with lower power consumption and a simplified design that eliminates the need for validation committees.
 
-CPoS is still an emerging idea and requires extensive testing to validate its correctness and efficiency. Since its first implementation, it showed satisfactory results, and it has been enhanced continuously. This refactored implementation presents some new characteristics added to CPoS, making the code easier to understand, run and mantain.
+Although still in its early stages, CPoS has shown promising results since its initial implementation and has undergone continuous enhancements. This updated version introduces new features that improve the algorithm’s readability, operability, and maintainability.
 
-The contents in this repository is explained in the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the Workshop on Scientific Initiation and Undergraduate Works (WTICG), an event integrated with the Brazilian Symposium on Information and Computational Systems Security (SBSeg 2024 - https://doi.org/10.5753/sbseg_estendido.2024.243386).
+The repository's content is detailed in the article "Evaluating the Network Traffic on an Improved Version of the Committeeless Proof-of-Stake Blockchain Consensus Algorithm". This work was presented at the Workshop on Scientific Initiation and Undergraduate Works (WTICG), an event integrated with the Brazilian Symposium on Information and Computational Systems Security (SBSeg 2024). The article is accessible via DOI: 10.5753/sbseg_estendido.2024.243386.
 
 # Abstract
 
-This repository stores the source code used for collecting the data shown in the aforementioned article. The file README.md also gives instructions on how to run the simulations and collect the data.
+This repository contains the source code used to generate the data presented in the aforementioned article. Additionally, the README.md file provides detailed instructions on running simulations and collecting the corresponding data.
 
 # Running the simulation
 
@@ -37,8 +37,9 @@ $ poetry shell
 
 ## Running local network (minimum test)
 
-As a minimum test, you can run all the network's nodes in a local machine. The file docker-compose-local.yml contains environment variables that control various parameters for the consensus mechanism and the network. These values can be changed, just make sure that the value of TOTAL_STAKE corresponds to the total number of nodes in the network (replicas). For this article, the number of replicas of node_dishonest was kept at 0. The version of the file available already contains a default set of parameters for a demo run, but you can change it accordingly if you desire. Below is an example of some parameters you can customize through Docker Compose's environment variables:
+As a basic test, you can run all network nodes locally on a single machine. The docker-compose-local.yml file includes environment variables that control various parameters for both the consensus mechanism and the network configuration. You can modify these variables as needed, ensuring that the value of TOTAL_STAKE matches the total number of nodes (replicas) in the network.
 
+For the tests described in the article, the number of node_dishonest replicas was set to 0. The provided configuration file includes a default set of parameters for a demo run, which you can adjust to suit your needs. Below are examples of some customizable parameters available through Docker Compose's environment variables:
 ```
 environment:
       - BEACON_IP=beacon
@@ -70,28 +71,34 @@ $ docker compose --file docker-compose-local.yml down
 
 The execution of the program beeing halted does not take down the docker node, therefore it is necessary to run the command presented above after all the nodes have halted.
 
-**Note:** It is importante to note that each node in the network is programmed to run for 30 rounds. However, the round number does not start at 0. It is determined by the number of round times since the date and time 2024-06-01 00:00:00. So the execution will start in a round number x, and run until approximatelly x + 30. The nodes can have small disagreements amongst themselves in what round "x" the execution started, since their internal clocks might not be perfectly synchronized. This applies to all the ways of running the simulation.
+**Note:** It is important to note that each node in the network is configured to run for 30 rounds. However, the starting round number is not fixed at 0. Instead, it is calculated based on the number of round intervals elapsed since the reference timestamp: 2024-06-01 00:00:00. As a result, the execution will begin at a specific round number 𝑥, and proceed approximately until 𝑥+30. Due to potential variations in the nodes' internal clocks, there may be minor discrepancies in the exact starting round 𝑥 among the nodes. This lack of perfect synchronization is inherent to the system and applies universally across all methods of running the simulation.
 
 ## Running with distributed nodes
 
-To run with distributed nodes, you should have a [Docker Swarm set up](https://docs.docker.com/engine/swarm/swarm-tutorial/) with only one Manager. Be sure to have the specified ports open on every node.
+To run the system with distributed nodes, you need to set up a [Docker Swarm set up](https://docs.docker.com/engine/swarm/swarm-tutorial/) with a single Manager node. Ensure that the required ports are open on all nodes participating in the swarm to enable proper communication.
 
-After that, you can configure the environment variables on `docker-compose.yml`, such as the variable Tau, the round time, etc.. Just make sure that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network. For this article, the number of replicas of node_dishonest was kept at 0. The version of the file available already contains a default set of parameters for a demo run, but you can change it accordingly if you desire.
+After setting up the Docker Swarm, you can configure the environment variables in the docker-compose.yml file. Key parameters, such as the variable Tau, the round time, and others, can be customized according to your needs. Ensure that the value of TOTAL_STAKE matches the total number of node replicas in the network.
 
-If you want to copy the log files to process and extract some data, fill the following fields accordingly, so that the data will be sent from the containers to a centralized machine:
+For the tests described in the SBSeg article, the number of replicas for node_dishonest was set to 0. The provided file includes a default set of parameters optimized for a demo run, but you are free to modify them as needed.
+
+To copy log files for processing and data extraction, complete the specified fields in the configuration to enable data transfer from the containers to a centralized machine. This setup ensures that logs are properly aggregated for further analysis.
 
 1. `SSH_ADDRESS`: user@address of the machine you want to send the data to;
 2. `SSH_PASSWORD`: the password for the account;
 3. `SCP_PATH`: the full path where you want to send the data to.
 
-Now, with everything configured, you can start the scheme with the following commands:
+Once everything is configured, you can start the system using the following commands:
 
 ```
 $ docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node cpos_node_dishonest
 $ docker stack deploy -c docker-compose.yml cpos
 ```
 
-You have to remove the cpos_node service and then deploy the stack again because the cpos_node / cpos_node_dishonest has to deploy after the cpos_beacon, and there isn't a way to guarantee the deploy order with Docker Swarm. Otherwise, the nodes wouldn't be able to reach the beacon through its service name. There's a possibility the first command will fail if the cpos_test_network is not created by the time cpos_node or cpos_beacon is deployed. If this happens, run the command again. Unfortunately, we cannot guarantee the order of deploy with Docker Swarm. To make sure the beacon doesn't register any of the nodes from the first deploy, wait at least 6 times the round time before running the second command, so that it empties its list.
+To ensure proper deployment, you must remove the cpos_node service and redeploy the stack. This is necessary because the cpos_node or cpos_node_dishonest services must start after the cpos_beacon service, and Docker Swarm does not guarantee deployment order. If the nodes start before the beacon, they will fail to resolve its service name.
+
+There is a chance the initial command might fail if the cpos_test_network is not created before deploying cpos_node or cpos_beacon. If this occurs, simply rerun the command. Unfortunately, Docker Swarm does not provide a built-in way to enforce deployment order.
+
+To ensure the beacon does not register any nodes from the first deployment attempt, wait for a period equivalent to six times the round time before executing the second command. This allows the beacon's list to empty and ensures proper registration.
 
 If you want to monitor the logs to see what's going on, you can use these commands:
 
@@ -101,9 +108,9 @@ $ docker service logs --follow --raw cpos_node_dishonest
 $ docker service logs --follow --raw cpos_beacon
 ```
 
-The first one refers to the node, and the second one to the beacon. You can press CTRL + C to exit the logs.
+The first command corresponds to the node, while the second one is for the beacon. You can monitor the logs for both processes and press CTRL + C to exit the logs when done.
 
-After all the data has been collected and the resulting .data files have been moved into the folder demo/logs you can process the data by running this command inside a poetry shell:
+After collecting all the data and moving the resulting .data files into the demo/logs folder, you can process the data by running the following command inside a Poetry shell:
 
 ```
 $ python demo/process_data.py
@@ -117,30 +124,43 @@ $ docker stack rm cpos
 
 ## Running with distributed nodes automatically
 
-In order to run the experiments automatically, you can use the bash script as follows:
+In order to run the experiments automatically, you can use the provided bash script by executing it as follows:
 
 ```
 $ ./demo/run_experiments.sh
 ```
 
-With the configuration present on the Github version of this script, it will run the same experiments as the ones for the article. Be sure to configure the `SSH_ADDRESS` and `SSH_PASSWORD` (on the docker-compose.yml file) adequately so that the logs are copied somewhere. It is also important that the value of TOTAL_STAKE corresponds to the total number of node replicas in the network.
+With the configuration provided in the GitHub version of this script, it will automatically run the same experiments as those described in the SBSeg article. Make sure to properly configure the SSH_ADDRESS and SSH_PASSWORD in the docker-compose.yml file, so that the logs are copied to the desired location. Additionally, ensure that the value of TOTAL_STAKE matches the total number of node replicas in the network.
 
-After that, you can configure the `demo/process_data.py` script's log directory to process each experiment's data files. Here's an example:
+Next, you can configure the demo/process_data.py script’s log directory to process the data files from each experiment. Below is an example of how to set the log directory for processing:
 
 ```
 log_dir = join(cwd, "demo/logs/5_5_1")
 ```
 
-Then, inside a poetry shell, you can process the data with the following command:
+Next, you can configure the demo/process_data.py script’s log directory to process the data files from each experiment. Below is an example of how to set the log directory for processing:
 
 ```
 $ python demo/process_data.py
 ```
 
-# Examples of changing parameters for the executions
+# Examples of parameter customization for executions
 
-It is possible to change some of the parameters used in the execution by modifying the files docker-compose-local.yml, docker-compose.yml or demo/run_experiments.sh depending on the type of execution. A few examples are:
+You can modify various parameters used in the execution by editing the relevant files: docker-compose-local.yml, docker-compose.yml, or demo/run_experiments.sh, depending on the type of execution. Below are a few examples:
 
-- To change the values for the CPoS parameter “tau” used in the experiments, change line 30 of docker-compose-local.yml (for the local network); line 53 of docker-compose.yml (for the non-automatic distributed network); or line 22 of demo/run_experiments.sh (for the automatic distributed network).
-- To change the values for the duration of a round used in the experiments, change lines 11 and 20 of docker-compose-local.yml (for the local network); lines 20 and 51 of docker-compose.yml (for the non-automatic distributed network); or line 23 of demo/run_experiments.sh (for the automatic distributed network).
-- To change the number of nodes in the CPoS network, it is also necessary to guarantee that the total stake will be equal to the number of nodes. In order to change these parameters, modify the lines 21 and 31 of docker-compose-local.yml (for the local network); or lines 25 and 54 of docker-compose.yml (for both the automatic and non-automatic distributed networks)
+- Changing the "tau" parameter for CPoS:
+  - For the local network, edit line 30 in docker-compose-local.yml.
+  - For the non-automatic distributed network, modify line 53 in docker-compose.yml.
+  - For the automatic distributed network, update line 22 in demo/run_experiments.sh.
+
+- Adjusting the round duration:
+  - For the local network, change lines 11 and 20 in docker-compose-local.yml.
+  - For the non-automatic distributed network, adjust lines 20 and 51 in docker-compose.yml.
+  - For the automatic distributed network, modify line 23 in demo/run_experiments.sh.
+
+- Changing the number of nodes in the CPoS network:
+  - Ensure that the TOTAL_STAKE value matches the number of nodes.
+  - For the local network, modify lines 21 and 31 in docker-compose-local.yml.
+  - For both automatic and non-automatic distributed networks, adjust lines 25 and 54 in docker-compose.yml.
+
+These modifications allow you to customize various aspects of the network and experiment setup.
