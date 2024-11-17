@@ -3,7 +3,8 @@
 calculate_sleep_time() {
     local round_time=$1
     local base_sleep=120
-    local additional_sleep=$(( round_time * 30 ))
+    local rounds=${NUMBER_OF_ROUNDS:-30}
+    local additional_sleep=$(( round_time * rounds ))
     echo $(( base_sleep + additional_sleep ))
 }
 
@@ -39,7 +40,7 @@ for TAU in "${TAU_VALUES[@]}"; do
                 export SCP_PATH="~/logs/${NUM_PEER}peers/${TAU}_${ROUND_TIME}_${i}"
 
                 # Bring up services in detached mode
-                docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node
+                docker stack deploy -c docker-compose.yml cpos && docker service rm cpos_node cpos_node_dishonest
                 sleep_duration=$((ROUND_TIME * 7))
                 sleep $sleep_duration
                 docker stack deploy -c docker-compose.yml cpos
@@ -47,7 +48,7 @@ for TAU in "${TAU_VALUES[@]}"; do
                 # Wait for all containers to exit
                 echo "Waiting for containers to finish..."
                 # Calculate and wait for the specified time
-                sleep_time=$(calculate_sleep_time "$ROUND_TIME")
+                sleep_time=$(calculate_sleep_time "$ROUND_TIME") # CHANGE THIS TO APPROPRIATE NUMBER OF ROUNDS BEFORE EXECUTION
                 sleep "$sleep_time"
 
                 # After all containers have finished, bring down services

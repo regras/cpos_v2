@@ -1,6 +1,7 @@
 services:
   beacon:
     # image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     volumes:
@@ -13,6 +14,7 @@ services:
 
   node:
     # image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     depends_on:
@@ -25,6 +27,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - NUMBER_OF_ROUNDS=30
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
@@ -44,6 +47,7 @@ services:
 
   node_dishonest:
     # image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     depends_on:
@@ -56,6 +60,7 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
+      - NUMBER_OF_ROUNDS=30
       - ROUND_TIME=20
       - TOLERANCE=2
       - TAU=3
