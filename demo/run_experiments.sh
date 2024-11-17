@@ -3,7 +3,8 @@
 calculate_sleep_time() {
     local round_time=$1
     local base_sleep=120
-    local additional_sleep=$(( round_time * 30 ))
+    local rounds=${NUMBER_OF_ROUNDS:-30}
+    local additional_sleep=$(( round_time * rounds ))
     echo $(( base_sleep + additional_sleep ))
 }
 
