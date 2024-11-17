@@ -1,6 +1,7 @@
 services:
   beacon:
-    image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     deploy:
@@ -16,18 +17,19 @@ services:
     #   - "9000:9000"
     environment:
       - PORT=9000
-      - NUM_PEERS_SEND=${NUM_PEER}           # number of peers sent by beacon to nodes who just entered or need more
-      - ROUND_TIME=${ROUND_TIME}
+      - NUM_PEERS_SEND=${NUM_PEER:-5}           # number of peers sent by beacon to nodes who just entered or need more
+      - ROUND_TIME=${ROUND_TIME:-10}
     command: /bin/bash demo/run_beacon.sh
 
   node:
-    image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     depends_on:
       - beacon
     deploy:
-      replicas: 25
+      replicas: ${NODE_REPLICAS:-25}
       placement:
           max_replicas_per_node: 2
           constraints:
@@ -48,13 +50,14 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
-      - ROUND_TIME=${ROUND_TIME}
+      - NUMBER_OF_ROUNDS=30
+      - ROUND_TIME=${ROUND_TIME:-10}
       - TOLERANCE=2
-      - TAU=${TAU}
+      - TAU=${TAU:-3}
       - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
-      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS}              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS}              # minimum number of peers a node can have
+      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS:-7}              # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS:-4}              # minimum number of peers a node can have
       - BROADCAST_CREATED_BLOCK=true     
       - BROADCAST_RECEIVED_BLOCK=true
       
@@ -66,13 +69,14 @@ services:
     command: /bin/bash demo/run_node.sh
 
   node_dishonest:
-    image: filipefranco/cpos_v2
+    image: georgejuniorg/cpos_v2
+    # image: filipefranco/cpos_v2
     build: .
     tty: true
     depends_on:
       - beacon
     deploy:
-      replicas: 0
+      replicas: ${NODE_DISHONEST_REPLICAS:-0} 
       placement:
           max_replicas_per_node: 1
           constraints:
@@ -93,15 +97,16 @@ services:
       - BEACON_IP=beacon
       - BEACON_PORT=9000
       - PORT=8888
-      - ROUND_TIME=${ROUND_TIME}
+      - NUMBER_OF_ROUNDS=30
+      - ROUND_TIME=${ROUND_TIME:-10}
       - TOLERANCE=2
-      - TAU=${TAU}
+      - TAU=${TAU:-3}
       - TOTAL_STAKE=25
       - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
-      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS}              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS}              # minimum number of peers a node can have
-      - BROADCAST_CREATED_BLOCK=false
-      - BROADCAST_RECEIVED_BLOCK=false
+      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS:-7}              # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS:-4}              # minimum number of peers a node can have
+      - BROADCAST_CREATED_BLOCK=${DISHONEST_BROADCAST_CREATED_BLOCK:-false} 
+      - BROADCAST_RECEIVED_BLOCK=${DISHONEST_BROADCAST_RECEIVED_BLOCK:-true} 
       
       # Be careful not to commit the following information to github
       - SSH_ADDRESS=

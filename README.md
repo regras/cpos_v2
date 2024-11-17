@@ -10,6 +10,7 @@ The repository's content is detailed in the article "Evaluating the Network Traf
 
 This repository contains the source code used to generate the data presented in the aforementioned article. Additionally, the README.md file provides detailed instructions on running simulations and collecting the corresponding data.
 
+
 # Running the simulation
 
 ## Dependencies
@@ -108,7 +109,7 @@ $ docker service logs --follow --raw cpos_node_dishonest
 $ docker service logs --follow --raw cpos_beacon
 ```
 
-The first command corresponds to the node, while the second one is for the beacon. You can monitor the logs for both processes and press CTRL + C to exit the logs when done.
+The first two commands above refer to the nodes, while the third one pertains to the beacon. To exit the logs at any point, press CTRL + C.
 
 After collecting all the data and moving the resulting .data files into the demo/logs folder, you can process the data by running the following command inside a Poetry shell:
 

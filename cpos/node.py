@@ -89,6 +89,7 @@ class Node:
         tau = int(os.getenv("TAU", 10))
         total_stake = int(os.getenv("TOTAL_STAKE", 25))
 
+        self.logger.info("PARAMETERS:    " + f" STAKE: {total_stake}      TAU: {tau}     RT:{round_time}     MIN_PEER: {self.minimum_num_peers}     MAX_PEER:{self.maximum_num_peers}    CREATED: {self.broadcast_created_block}     RECEIVED: {self.broadcast_received_block}")
         params = BlockChainParameters(round_time=round_time, tolerance=tolerance, tau=tau, total_stake=total_stake)
         self.bc: BlockChain = BlockChain(params, genesis=genesis, node_id=self.id)
         self.state = State.LISTENING
@@ -97,6 +98,11 @@ class Node:
         
         self.message_count = 0
         self.total_message_bytes = 0
+
+        self.produced_blocks = 0 
+        self.received_blocks = 0
+        self.resyncs = 0
+        self.successfull_resyncs = 0
         
         self.should_halt: bool = False
 
@@ -108,7 +114,8 @@ class Node:
         try:
             with open(filepath, "wb") as file:
                 blockchain_info = [self.bc.parameters.round_time, self.bc.last_confirmation_delay, self.bc.current_round]
-                data = pickle.dumps((self.bc.last_n_blocks(self.bc.number_of_blocks()), self.bc.last_confirmed_block_info(), self.message_count, self.total_message_bytes, blockchain_info))
+                debug_info = [self.produced_blocks, self.received_blocks, self.bc.forks_detected ,self.resyncs, self.successfull_resyncs, sorted([i.hex()[0:8] for i in self.network.known_peers])]
+                data = pickle.dumps((self.bc.last_n_blocks(self.bc.number_of_blocks()), self.bc.last_confirmed_block_info(), self.bc.confirmation_delays, self.message_count, self.total_message_bytes, blockchain_info, debug_info))
                 file.write(data)
                 file.flush()
                 file.close()
@@ -198,15 +205,19 @@ class Node:
             self.logger.info(f"discarding block {block.hash.hex()[0:8]} (produced by itself)")
             return False
         self.logger.info(f"trying to insert {block}")
-        if not self.bc.insert(block):
-            if not self.bc.block_in_blockchain(block):
-                self.missed_blocks.append((block, peer_id))
-            #if block not in self.bc:
-            #    self.missed_blocks.append((block, peer_id))
-        else:
+        self.received_blocks += 1
+        block_in_blockchain = self.bc.block_in_blockchain(block)
+        block_in_missed_blocks = any(tup[0].hash.hex() == block.hash.hex() for tup in self.missed_blocks)
+        if not (block_in_blockchain or block_in_missed_blocks):
             own_id = self.id if not None else self.config.id
             if self.broadcast_received_block:
                 self.broadcast_message(BlockBroadcast(block, own_id), [peer_id, block.owner_pubkey])
+                # TODO: Blocks are retransmitted and stored without even checking if they are valid. This is ok in a simulation, but unsafe for real use.
+            if not self.bc.insert(block):
+                if not block_in_blockchain:
+                    # TODO: missed_blocks grows infinetly for every block received from a peer. After a suficient number of rounds, it will grow too big.
+                    # It would be reosonable to have a limit to its size and start deleting old blocks, and maybe store peer_id and block seperatelly and without repetition
+                    self.missed_blocks.append((block, peer_id))
 
     def control_number_of_peers(self):
         if len(self.network.known_peers) < self.minimum_num_peers: 
@@ -251,6 +262,7 @@ class Node:
                 if stopResyncing:
                     continue
                 self.state = State.RESYNCING
+                self.resyncs += 1
                 self.logger.info("started resyncing")
 
             self.bc.update_round()
@@ -264,6 +276,7 @@ class Node:
                 round = self.bc.current_round
                 new_block = self.generate_block()
                 if new_block is not None and self.broadcast_created_block: # if dishonest node isnt going to broadcast block, it is also not going to insert in local blockchain
+                    self.produced_blocks += 1
                     self.bc.insert(new_block)
                     own_id = self.id if not None else self.config.id
                     if self.broadcast_created_block:
@@ -322,6 +335,7 @@ class Node:
                         self.received_resync_blocks = []
                         self.bc.fork_detected = False
                         self.missed_blocks = []
+                        self.successfull_resyncs += 1
                         self.logger.info("resync completed!")
 
                     # If it is needed to request for more blocks

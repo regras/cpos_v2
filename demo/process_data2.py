@@ -15,7 +15,7 @@ def main():
     total_blocks = 0
     total_confirmed_blocks = 0
     total = 0
-    smallest_confirmation_delays = {}
+    all_confirmation_delays = []
     successfull_nodes = 0
     
     for filename in os.listdir(log_dir):
@@ -38,15 +38,15 @@ def main():
             total += 1
             # block_delay has a format: [block_id, block_index, confirmation_delay (in rounds)]
             for block_delay in confirmation_delays:
-                if not block_delay[1] in smallest_confirmation_delays or smallest_confirmation_delays[block_delay[1]] > block_delay[2]:
-                    smallest_confirmation_delays[block_delay[1]] = block_delay[2]
+                all_confirmation_delays.append(block_delay[2])
+
         print(f"Produced blocks: {debug_info[0]},   Received Blocks: {debug_info[1]},   Forks Detected: {debug_info[2]},    Resyncs: {debug_info[3]},    Successfull Resyncs: {debug_info[4]}, Known Peers: {len(debug_info[5])}")
         print(f"Overturns: {len(ini_confirmation_delays) - len(confirmation_delays)}")
         print(f"-------------------------------------\n")
 
     avg_throughput /= total
     try:
-        average_confirmation_delay = round(sum(smallest_confirmation_delays) / len(smallest_confirmation_delays), 3)
+        average_confirmation_delay = round(sum(all_confirmation_delays) / len(all_confirmation_delays), 3)
     except ZeroDivisionError:
         average_confirmation_delay = '0 CONFIRMED'
     
