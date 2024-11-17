@@ -1,12 +1,14 @@
-# WTICG SBSeg24 Article
+# CPoS v.2 - A refactored and improved implementation of Commiteeless Proof-of-Stake consensus algorithm
 
-This repository is tied to the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the Workshop on Scientific Initiation and Undergraduate Works (WTICG), an event integrated with the Brazilian Symposium on Information and Computational Systems Security (SBSeg).
+Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better-known Proof-of-Work and Proof-of-Stake, with its reduced power consumption and more straightforward design without validation committees. 
 
-Article's abstract: Blockchain is a powerful way to store and process data in a decentralized manner. Among its consensus algorithms, Committeeless Proof-of-Stake (CPoS) comes as a promising alternative to the better-known Proof-of-Work and Proof-of-Stake, with its reduced power consumption and more straightforward design without validation committees. However, CPoS is still an emerging algorithm and requires extensive testing to validate its correctness and efficiency. Its first implementation was promising and showed satisfactory results, but it has been enhanced continuously. This article aims to present the new characteristics added to CPoS and evaluate their impact on the data traffic and on the scheme as a whole.
+CPoS is still an emerging idea and requires extensive testing to validate its correctness and efficiency. Since its first implementation, it showed satisfactory results, and it has been enhanced continuously. This refactored implementation presents some new characteristics added to CPoS, making the code easier to understand, run and mantain.
+
+The contents in this repository is explained in the article "Evaluating the network traffic on an improved version of the Committeeless Proof-of-Stake blockchain consensus algorithm" published in the Workshop on Scientific Initiation and Undergraduate Works (WTICG), an event integrated with the Brazilian Symposium on Information and Computational Systems Security (SBSeg 2024 - https://doi.org/10.5753/sbseg_estendido.2024.243386).
 
 # Abstract
 
-This repository stores the source code used for collecting the data for the aforementioned article. The file README.md also gives instructions on how to run the simulations and collect the data.
+This repository stores the source code used for collecting the data shown in the aforementioned article. The file README.md also gives instructions on how to run the simulations and collect the data.
 
 # Running the simulation
 
