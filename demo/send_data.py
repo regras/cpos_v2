@@ -43,10 +43,16 @@ def send_data():
                 print("Finished copying log files!")
                 break
             except:
+                print(f"Error during SCP: {e}")
                 if retry < max_retries - 1:
                     print("Trying to send SCP again!")
                 else:
                     print("Failed to send data through SCP")
+            finally:
+                if scp:
+                    scp.close()
+                if ssh:
+                    ssh.close()
 
     else:
         print("Couldn't send data! SSH address and/or password and/or scp path not specified.")
