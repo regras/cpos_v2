@@ -28,6 +28,8 @@ def send_data():
 
     if ssh_address and ssh_password and scp_filepath:
         for retry in range(max_retries):
+            ssh = None
+            scp = None
             try:
                 print(f"Sending log files to {ssh_address} at {scp_filepath}")
 
@@ -42,7 +44,7 @@ def send_data():
 
                 print("Finished copying log files!")
                 break
-            except:
+            except Exception as e:
                 print(f"Error during SCP: {e}")
                 if retry < max_retries - 1:
                     print("Trying to send SCP again!")
