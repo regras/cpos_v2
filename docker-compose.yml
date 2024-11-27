@@ -16,9 +16,9 @@ services:
     # ports:
     #   - "9000:9000"
     environment:
-      - PORT=9000
-      - NUM_PEERS_SEND=${NUM_PEER:-5}           # number of peers sent by beacon to nodes who just entered or need more
-      - ROUND_TIME=${ROUND_TIME:-10}
+      - PORT=9000                                   # beacon port, must be the same as BEACON_PORT on the node service
+      - NUM_PEERS_SEND=${NUM_PEER:-5}               # number of peers sent by beacon to nodes who just entered or need more
+      - ROUND_TIME=${ROUND_TIME:-10}                # round time in seconds, it's important to set this to the same ROUND_TIME as the node and the node_dishonest services
     command: /bin/bash demo/run_beacon.sh
 
   node:
@@ -29,9 +29,9 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: ${NODE_REPLICAS:-25}
+      replicas: ${NODE_REPLICAS:-25}                # number of nodes (honest) that will be created
       placement:
-          max_replicas_per_node: 2
+          max_replicas_per_node: 2                  # maximum number of nodes per physical machine that is part of the swarm
           constraints:
             - node.role == worker
             # - node.labels.mynode == deterlab
@@ -47,24 +47,24 @@ services:
       #   mode: host
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
-      - BEACON_IP=beacon
-      - BEACON_PORT=9000
-      - PORT=8888
-      - NUMBER_OF_ROUNDS=30
-      - ROUND_TIME=${ROUND_TIME:-10}
-      - TOLERANCE=2
-      - TAU=${TAU:-3}
-      - TOTAL_STAKE=25
-      - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
-      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS:-7}              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS:-4}              # minimum number of peers a node can have
-      - BROADCAST_CREATED_BLOCK=true     
-      - BROADCAST_RECEIVED_BLOCK=true
+      - BEACON_IP=beacon                            # currently set as the name of the beacon service. When there's more than one beacon, it has to be changed
+      - BEACON_PORT=9000                            # must be the same as PORT on the beacon service
+      - PORT=8888                                   # node port
+      - NUMBER_OF_ROUNDS=30                         # number of rounds that will be executed before the nodes halt
+      - ROUND_TIME=${ROUND_TIME:-10}                # round time in seconds, it's important to set this to the same ROUND_TIME as the beacon and the node_dishonest services
+      - TOLERANCE=2                                 # number of tolerance rounds, as defined on the CPoS proposal
+      - TAU=${TAU:-3}                               # average number of successful sortitions per round, as defined on the CPoS proposal
+      - TOTAL_STAKE=25                              # total stake on the scheme. Currently, it's important to set it as the same number of node + node_dishonest replicas
+      - MOCK_TRANSACTIONS=true                      # set to true to use randomly generated transactions and set to false to use empty blocks (no transactions)
+      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS:-7}   # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS:-4}   # minimum number of peers a node can have
+      - BROADCAST_CREATED_BLOCK=true                # determines whether the node will broadcast the blocks it created. Always true for honest nodes
+      - BROADCAST_RECEIVED_BLOCK=true               # determines whether the node will broadcast the blocks it received. Always true for honest nodes
       
       # Be careful not to commit the following information to github
-      - SSH_ADDRESS=
+      - SSH_ADDRESS=                                # e.g. user@address
       - SSH_PASSWORD=
-      - SCP_PATH=${SCP_PATH}
+      - SCP_PATH=${SCP_PATH}                        # e.g. ~/logs
 
     command: /bin/bash demo/run_node.sh
 
@@ -76,9 +76,9 @@ services:
     depends_on:
       - beacon
     deploy:
-      replicas: ${NODE_DISHONEST_REPLICAS:-0} 
+      replicas: ${NODE_DISHONEST_REPLICAS:-0}       # number of dishonest nodes that will be created
       placement:
-          max_replicas_per_node: 1
+          max_replicas_per_node: 1                  # maximum number of dishonest nodes per physical machine that is part of the swarm
           constraints:
             - node.role == worker
             # - node.labels.mynode == deterlab
@@ -94,24 +94,24 @@ services:
       #   mode: host
     environment:
       # - BEACON_IP=join.dca.fee.unicamp.br
-      - BEACON_IP=beacon
-      - BEACON_PORT=9000
-      - PORT=8888
-      - NUMBER_OF_ROUNDS=30
-      - ROUND_TIME=${ROUND_TIME:-10}
-      - TOLERANCE=2
-      - TAU=${TAU:-3}
-      - TOTAL_STAKE=25
-      - MOCK_TRANSACTIONS=true           # set to true to use randomly generated transactions
-      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS:-7}              # maximum number of peers a node can have
-      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS:-4}              # minimum number of peers a node can have
-      - BROADCAST_CREATED_BLOCK=${DISHONEST_BROADCAST_CREATED_BLOCK:-false} 
-      - BROADCAST_RECEIVED_BLOCK=${DISHONEST_BROADCAST_RECEIVED_BLOCK:-true} 
+      - BEACON_IP=beacon                                                      # currently set as the name of the beacon service. When there's more than one beacon, it has to be changed
+      - BEACON_PORT=9000                                                      # must be the same as PORT on the beacon service
+      - PORT=8888                                                             # node port
+      - NUMBER_OF_ROUNDS=30                                                   # number of rounds that will be executed before the nodes halt
+      - ROUND_TIME=${ROUND_TIME:-10}                                          # round time in seconds, it's important to set this to the same ROUND_TIME as the beacon and the node services
+      - TOLERANCE=2                                                           # number of tolerance rounds, as defined on the CPoS proposal
+      - TAU=${TAU:-3}                                                         # average number of successful sortitions per round, as defined on the CPoS proposal
+      - TOTAL_STAKE=25                                                        # total stake on the scheme. Currently, it's important to set it as the same number of node + node_dishonest replicas
+      - MOCK_TRANSACTIONS=true                                                # set to true to use randomly generated transactions and set to false to use empty blocks (no transactions)
+      - MAXIMUM_NUM_PEERS=${MAXIMUM_NUM_PEERS:-7}                             # maximum number of peers a node can have
+      - MINIMUM_NUM_PEERS=${MINIMUM_NUM_PEERS:-4}                             # minimum number of peers a node can have
+      - BROADCAST_CREATED_BLOCK=${DISHONEST_BROADCAST_CREATED_BLOCK:-false}   # determines whether the node will broadcast the blocks it created. Default is false for dishonest nodes
+      - BROADCAST_RECEIVED_BLOCK=${DISHONEST_BROADCAST_RECEIVED_BLOCK:-true}  # determines whether the node will broadcast the blocks it received. Default is true for dishonest nodes
       
       # Be careful not to commit the following information to github
-      - SSH_ADDRESS=
+      - SSH_ADDRESS=                                                          # e.g. user@address
       - SSH_PASSWORD=
-      - SCP_PATH=${SCP_PATH}
+      - SCP_PATH=${SCP_PATH}                                                  # e.g. ~/logs
 
     command: /bin/bash demo/run_node.sh
 
